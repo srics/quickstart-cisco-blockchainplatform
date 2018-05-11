@@ -1,1 +1,42 @@
-{}
+[
+    {
+        "ParameterKey": "AvailabilityZones",
+        "ParameterValue": "$[taskcat_genaz_2]"
+    },
+    {
+        "ParameterKey": "InstanceType",
+        "ParameterValue": "t2.large"
+    },
+    {
+        "ParameterKey": "KeyPairName",
+        "ParameterValue": "use-override"
+    },
+    {
+        "ParameterKey": "NumberOfAZs",
+        "ParameterValue": "2"
+    },
+    {
+        "ParameterKey": "PublicSubnet1CIDR",
+        "ParameterValue": "10.0.128.0/20"
+    },
+    {
+        "ParameterKey": "PublicSubnet2CIDR",
+        "ParameterValue": "10.0.144.0/20"
+    },
+    {
+        "ParameterKey": "QSS3BucketName",
+        "ParameterValue": "aws-quickstart"
+    },
+    {
+        "ParameterKey": "QSS3KeyPrefix",
+        "ParameterValue": "quickstart-cisco-blockchain-platform/"
+    },
+    {
+        "ParameterKey": "RemoteAccessCIDR",
+        "ParameterValue": "use-override"
+    },
+    {
+        "ParameterKey": "VPCCIDR",
+        "ParameterValue": "10.0.0.0/16"
+    }
+]
