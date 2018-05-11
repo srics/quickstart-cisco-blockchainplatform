@@ -21,3 +21,5 @@ tests:
   cisco-blockchain-master:
     parameter_input: cisco-blockchain-master-inputs.json
     template_file: cisco-blockchain-master.template
+    regions:
+      - us-east-1

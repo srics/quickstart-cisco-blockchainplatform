@@ -9,7 +9,7 @@
     },
     {
         "ParameterKey": "KeyPairName",
-        "ParameterValue": "use-override"
+        "ParameterValue": "tonynv"
     },
     {
         "ParameterKey": "NumberOfAZs",
@@ -25,15 +25,15 @@
     },
     {
         "ParameterKey": "QSS3BucketName",
-        "ParameterValue": "aws-quickstart"
-    },
-    {
-        "ParameterKey": "QSS3KeyPrefix",
-        "ParameterValue": "quickstart-cisco-blockchain-platform/"
+        "ParameterValue": "$[taskcat_autobucket]"
     },
     {
         "ParameterKey": "RemoteAccessCIDR",
-        "ParameterValue": "use-override"
+        "ParameterValue": "0.0.0.0/0"
+    },
+    {
+        "ParameterKey": "BlockChainAccessCIDR",
+        "ParameterValue": "0.0.0.0/0"
     },
     {
         "ParameterKey": "VPCCIDR",
