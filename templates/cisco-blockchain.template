@@ -239,7 +239,153 @@
         ]
       }
     },
-    "BlockChainInstance": {
+    "AdminPortal": {
+      "Type": "AWS::EC2::Instance",
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "configSets": {
+            "cisco_install": [
+              "docker_install"
+            ]
+          },
+          "docker_install": {
+            "commands": {
+              "01_start_install": {
+                "command": "echo \"start docker installation\""
+              },
+              "02_update_pkgs": {
+                "command": "sudo apt-get update"
+              },
+              "03_install_pkgs": {
+                "command": "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common"
+              },
+              "04_install_gpg_key": {
+                "command": "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
+              },
+              "05_add_docker_repo": {
+                "command": "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""
+              },
+              "06_update_pkgs": {
+                "command": "sudo apt-get update"
+              },
+              "07_install_docker": {
+                "command": "sudo apt-get install -y docker-ce docker-compose"
+              },
+              "08_docker_user_group": {
+                "command": "sudo usermod -aG docker ubuntu"
+              },
+              "09_docker_service_restart": {
+                "command": "sudo service docker restart"
+              },
+              "10_end_install": {
+                "command": "echo \"done docker installation\""
+              }
+            }
+          }
+        }
+      },
+      "Properties": {
+        "KeyName": {
+          "Ref": "KeyPairName"
+        },
+        "ImageId": {
+          "Fn::FindInMap": [
+            "AWSAMIRegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            "US1604HVM"
+          ]
+        },
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "SecurityGroupIds": [
+          {
+            "Ref": "BlockChainSecurityGroup"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "PublicSubnet1ID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AdminPortal"
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -x\n",
+                "function cfn_fail {",
+                "\n",
+                "cfn-signal -e 1 ",
+                "--stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " --resource AdminPortal",
+                "\nexit 1\n}",
+                "\n",
+                "function cfn_success {",
+                "\n",
+                "cfn-signal -e 0 ",
+                "--stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " --resource AdminPortal",
+                "\nexit 0\n}",
+                "\n",
+                "echo \"[Cloning: Load QuickStart Common Utils]\"\n",
+                "\n",
+                "#Once Repo is public (Use quickstart-linux-utilities submodue)\n",
+                "git clone -b develop https://github.com/aws-quickstart/quickstart-linux-utilities.git\n",
+                "source /quickstart-linux-utilities/quickstart-cfn-tools.source\n",
+                "\n",
+                "echo \"[Loaded: Load QuickStart Common Utils]\"\n",
+                "\n",
+                "echo \"[Update Operating System]\"\n",
+                "export QSSTACKNAME=${AWS::StackName}",
+                "export QSREGION=${AWS::Region}",
+                "qs_update-os || qs_error\n",
+                "qs_bootstrap_pip\n",
+                "qs_aws-cfn-bootstrap\n",
+                "echo \"[INFO]: Bootstrapping Status = $(qs_status)\"\n",
+                "cfn-init -v ",
+                " --stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " --resource AdminPortal",
+                " --configsets cisco_install",
+                " --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n",
+                "# Signal the status from cfn-init\n",
+                "[ $(qs_status) == 0 ] && cfn_success || echo cfn_fail",
+                "\n",
+                "\n"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "Peer0": {
       "Type": "AWS::EC2::Instance",
       "Metadata": {
         "AWS::CloudFormation::Init": {
@@ -281,6 +427,12 @@
         "SubnetId": {
           "Ref": "PublicSubnet1ID"
         },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer0"
+          }
+        ],
         "UserData": {
           "Fn::Base64": {
             "Fn::Join": [
@@ -298,7 +450,7 @@
                 {
                   "Ref": "AWS::Region"
                 },
-                " --resource BlockChainInstance",
+                " --resource Peer0",
                 "\nexit 1\n}",
                 "\n",
                 "function cfn_success {",
@@ -312,7 +464,7 @@
                 {
                   "Ref": "AWS::Region"
                 },
-                " --resource BlockChainInstance",
+                " --resource Peer0",
                 "\nexit 0\n}",
                 "\n",
                 "echo \"[Cloning: Load QuickStart Common Utils]\"\n",
@@ -335,7 +487,245 @@
                 {
                   "Ref": "AWS::StackName"
                 },
-                " --resource BlockChainInstance",
+                " --resource Peer0",
+                " --configsets cisco_install",
+                " --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n",
+                "# Signal the status from cfn-init\n",
+                "[ $(qs_status) == 0 ] && cfn_success || echo cfn_fail",
+                "\n",
+                "\n"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "Peer1": {
+      "Type": "AWS::EC2::Instance",
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "configSets": {
+            "cisco_install": [
+              "run_install"
+            ]
+          },
+          "run_install": {
+            "commands": {
+              "start_install": {
+                "command": "echo \"add install script here\""
+              }
+            }
+          }
+        }
+      },
+      "Properties": {
+        "KeyName": {
+          "Ref": "KeyPairName"
+        },
+        "ImageId": {
+          "Fn::FindInMap": [
+            "AWSAMIRegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            "US1604HVM"
+          ]
+        },
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "SecurityGroupIds": [
+          {
+            "Ref": "BlockChainSecurityGroup"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "PublicSubnet1ID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer1"
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -x\n",
+                "function cfn_fail {",
+                "\n",
+                "cfn-signal -e 1 ",
+                "--stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " --resource Peer1",
+                "\nexit 1\n}",
+                "\n",
+                "function cfn_success {",
+                "\n",
+                "cfn-signal -e 0 ",
+                "--stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " --resource Peer1",
+                "\nexit 0\n}",
+                "\n",
+                "echo \"[Cloning: Load QuickStart Common Utils]\"\n",
+                "\n",
+                "#Once Repo is public (Use quickstart-linux-utilities submodue)\n",
+                "git clone -b develop https://github.com/aws-quickstart/quickstart-linux-utilities.git\n",
+                "source /quickstart-linux-utilities/quickstart-cfn-tools.source\n",
+                "\n",
+                "echo \"[Loaded: Load QuickStart Common Utils]\"\n",
+                "\n",
+                "echo \"[Update Operating System]\"\n",
+                "export QSSTACKNAME=${AWS::StackName}",
+                "export QSREGION=${AWS::Region}",
+                "qs_update-os || qs_error\n",
+                "qs_bootstrap_pip\n",
+                "qs_aws-cfn-bootstrap\n",
+                "echo \"[INFO]: Bootstrapping Status = $(qs_status)\"\n",
+                "cfn-init -v ",
+                " --stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " --resource Peer1",
+                " --configsets cisco_install",
+                " --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                "\n",
+                "# Signal the status from cfn-init\n",
+                "[ $(qs_status) == 0 ] && cfn_success || echo cfn_fail",
+                "\n",
+                "\n"
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "Peer2": {
+      "Type": "AWS::EC2::Instance",
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "configSets": {
+            "cisco_install": [
+              "run_install"
+            ]
+          },
+          "run_install": {
+            "commands": {
+              "start_install": {
+                "command": "echo \"add install script here\""
+              }
+            }
+          }
+        }
+      },
+      "Properties": {
+        "KeyName": {
+          "Ref": "KeyPairName"
+        },
+        "ImageId": {
+          "Fn::FindInMap": [
+            "AWSAMIRegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            "US1604HVM"
+          ]
+        },
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "SecurityGroupIds": [
+          {
+            "Ref": "BlockChainSecurityGroup"
+          }
+        ],
+        "SubnetId": {
+          "Ref": "PublicSubnet1ID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer2"
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -x\n",
+                "function cfn_fail {",
+                "\n",
+                "cfn-signal -e 1 ",
+                "--stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " --resource Peer2",
+                "\nexit 1\n}",
+                "\n",
+                "function cfn_success {",
+                "\n",
+                "cfn-signal -e 0 ",
+                "--stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " --region ",
+                {
+                  "Ref": "AWS::Region"
+                },
+                " --resource Peer2",
+                "\nexit 0\n}",
+                "\n",
+                "echo \"[Cloning: Load QuickStart Common Utils]\"\n",
+                "\n",
+                "#Once Repo is public (Use quickstart-linux-utilities submodue)\n",
+                "git clone -b develop https://github.com/aws-quickstart/quickstart-linux-utilities.git\n",
+                "source /quickstart-linux-utilities/quickstart-cfn-tools.source\n",
+                "\n",
+                "echo \"[Loaded: Load QuickStart Common Utils]\"\n",
+                "\n",
+                "echo \"[Update Operating System]\"\n",
+                "export QSSTACKNAME=${AWS::StackName}",
+                "export QSREGION=${AWS::Region}",
+                "qs_update-os || qs_error\n",
+                "qs_bootstrap_pip\n",
+                "qs_aws-cfn-bootstrap\n",
+                "echo \"[INFO]: Bootstrapping Status = $(qs_status)\"\n",
+                "cfn-init -v ",
+                " --stack ",
+                {
+                  "Ref": "AWS::StackName"
+                },
+                " --resource Peer2",
                 " --configsets cisco_install",
                 " --region ",
                 {
@@ -354,20 +744,65 @@
     }
   },
   "Outputs": {
-    "BlockChainInstancePublicDnsName": {
+    "AdminPortalPublicDnsName": {
       "Value": {
         "Fn::GetAtt": [
-          "BlockChainInstance",
+          "AdminPortal",
           "PublicDnsName"
         ]
       },
-      "Description": "Public DNS Name for the BlockChain Instance"
+      "Description": "Public DNS Name for the AdminPortal Instance"
     },
-    "BlockChainInstancePublicIPAddress": {
+    "AdminPortalPublicIPAddress": {
       "Value": {
-        "Fn::Sub": "ubuntu@${BlockChainInstance.PublicIp}"
+        "Fn::Sub": "ubuntu@${AdminPortal.PublicIp}"
       },
-      "Description": "Public IP address for the BlockChain instance"
+      "Description": "Public IP address for the AdminPortal instance"
+    },
+    "Peer0PublicDnsName": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Peer0",
+          "PublicDnsName"
+        ]
+      },
+      "Description": "Public DNS Name for the Peer0 Instance"
+    },
+    "Peer0PublicIPAddress": {
+      "Value": {
+        "Fn::Sub": "ubuntu@${Peer0.PublicIp}"
+      },
+      "Description": "Public IP address for the Peer0 instance"
+    },
+    "Peer1PublicDnsName": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Peer1",
+          "PublicDnsName"
+        ]
+      },
+      "Description": "Public DNS Name for the Peer1 Instance"
+    },
+    "Peer1PublicIPAddress": {
+      "Value": {
+        "Fn::Sub": "ubuntu@${Peer1.PublicIp}"
+      },
+      "Description": "Public IP address for the Peer1 instance"
+    },
+    "Peer2PublicDnsName": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Peer2",
+          "PublicDnsName"
+        ]
+      },
+      "Description": "Public DNS Name for the Peer2 Instance"
+    },
+    "Peer2PublicIPAddress": {
+      "Value": {
+        "Fn::Sub": "ubuntu@${Peer2.PublicIp}"
+      },
+      "Description": "Public IP address for the Peer2 instance"
     }
   }
 }
