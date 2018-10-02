@@ -245,10 +245,10 @@
         "AWS::CloudFormation::Init": {
           "configSets": {
             "cisco_install": [
-              "docker_install"
+              "run_install"
             ]
           },
-          "docker_install": {
+          "run_install": {
             "commands": {
               "01_start_install": {
                 "command": "echo \"start docker installation\""
@@ -396,8 +396,35 @@
           },
           "run_install": {
             "commands": {
-              "start_install": {
-                "command": "echo \"add install script here\""
+              "01_start_install": {
+                "command": "echo \"start docker installation\""
+              },
+              "02_update_pkgs": {
+                "command": "sudo apt-get update"
+              },
+              "03_install_pkgs": {
+                "command": "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common"
+              },
+              "04_install_gpg_key": {
+                "command": "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
+              },
+              "05_add_docker_repo": {
+                "command": "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""
+              },
+              "06_update_pkgs": {
+                "command": "sudo apt-get update"
+              },
+              "07_install_docker": {
+                "command": "sudo apt-get install -y docker-ce docker-compose"
+              },
+              "08_docker_user_group": {
+                "command": "sudo usermod -aG docker ubuntu"
+              },
+              "09_docker_service_restart": {
+                "command": "sudo service docker restart"
+              },
+              "10_end_install": {
+                "command": "echo \"done docker installation\""
               }
             }
           }
@@ -515,8 +542,35 @@
           },
           "run_install": {
             "commands": {
-              "start_install": {
-                "command": "echo \"add install script here\""
+              "01_start_install": {
+                "command": "echo \"start docker installation\""
+              },
+              "02_update_pkgs": {
+                "command": "sudo apt-get update"
+              },
+              "03_install_pkgs": {
+                "command": "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common"
+              },
+              "04_install_gpg_key": {
+                "command": "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
+              },
+              "05_add_docker_repo": {
+                "command": "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""
+              },
+              "06_update_pkgs": {
+                "command": "sudo apt-get update"
+              },
+              "07_install_docker": {
+                "command": "sudo apt-get install -y docker-ce docker-compose"
+              },
+              "08_docker_user_group": {
+                "command": "sudo usermod -aG docker ubuntu"
+              },
+              "09_docker_service_restart": {
+                "command": "sudo service docker restart"
+              },
+              "10_end_install": {
+                "command": "echo \"done docker installation\""
               }
             }
           }
@@ -634,8 +688,35 @@
           },
           "run_install": {
             "commands": {
-              "start_install": {
-                "command": "echo \"add install script here\""
+              "01_start_install": {
+                "command": "echo \"start docker installation\""
+              },
+              "02_update_pkgs": {
+                "command": "sudo apt-get update"
+              },
+              "03_install_pkgs": {
+                "command": "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common"
+              },
+              "04_install_gpg_key": {
+                "command": "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
+              },
+              "05_add_docker_repo": {
+                "command": "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""
+              },
+              "06_update_pkgs": {
+                "command": "sudo apt-get update"
+              },
+              "07_install_docker": {
+                "command": "sudo apt-get install -y docker-ce docker-compose"
+              },
+              "08_docker_user_group": {
+                "command": "sudo usermod -aG docker ubuntu"
+              },
+              "09_docker_service_restart": {
+                "command": "sudo service docker restart"
+              },
+              "10_end_install": {
+                "command": "echo \"done docker installation\""
               }
             }
           }
