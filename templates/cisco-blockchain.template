@@ -22,7 +22,9 @@
           "Parameters": [
             "KeyPairName",
             "BlockChainAccessCIDR",
-            "InstanceType"
+            "InstanceType",
+            "DockerHubID",
+            "DockerHubKey"
           ]
         },
         {
@@ -53,6 +55,12 @@
         },
         "BlockChainAccessCIDR": {
           "default": "Allowed Application Access CIDR"
+        },
+        "DockerHubID": {
+          "default": "DockerHub Account ID"
+        },
+        "DockerHubKey": {
+          "default": "DockerHub Account Key"
         },
         "VPCID": {
           "default": "VPC ID"
@@ -115,6 +123,14 @@
       "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
       "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
       "Description": "Allowed CIDR block for external application access",
+      "Type": "String"
+    },
+    "DockerHubID": {
+      "Description": "The name of the dockerhub account ID, which allows you to access the required container images of the product",
+      "Type": "String"
+    },
+    "DockerHubKey": {
+      "Description": "The key or the password of the dockerhub account ID, which allows you to access the required container images of the product",
       "Type": "String"
     },
     "VPCID": {
@@ -251,7 +267,7 @@
           "run_install": {
             "commands": {
               "01_start_install": {
-                "command": "echo \"start docker installation\""
+                "command": "echo \"start installation\""
               },
               "02_update_pkgs": {
                 "command": "sudo apt-get update"
@@ -277,8 +293,11 @@
               "09_docker_service_restart": {
                 "command": "sudo service docker restart"
               },
-              "10_end_install": {
-                "command": "echo \"done docker installation\""
+              "10_install_portal": {
+                "command": "docker run --rm -it srics/vera-installer:0.1 --volume /var/run/docker.sock:/var/run/docker.sock /usr/local/bin/vera-install --install-portal --user foo --password bar"
+              },
+              "11_end_install": {
+                "command": "echo \"done installation\""
               }
             }
           }
@@ -397,7 +416,7 @@
           "run_install": {
             "commands": {
               "01_start_install": {
-                "command": "echo \"start docker installation\""
+                "command": "echo \"start installation\""
               },
               "02_update_pkgs": {
                 "command": "sudo apt-get update"
@@ -423,8 +442,11 @@
               "09_docker_service_restart": {
                 "command": "sudo service docker restart"
               },
-              "10_end_install": {
-                "command": "echo \"done docker installation\""
+              "10_install_portal": {
+                "command": "docker run --rm -it srics/vera-installer:0.1 --volume /var/run/docker.sock:/var/run/docker.sock /usr/local/bin/vera-install --install-peer peer0 --user foo --password bar"
+              },
+              "11_end_install": {
+                "command": "echo \"done installation\""
               }
             }
           }
@@ -543,7 +565,7 @@
           "run_install": {
             "commands": {
               "01_start_install": {
-                "command": "echo \"start docker installation\""
+                "command": "echo \"start installation\""
               },
               "02_update_pkgs": {
                 "command": "sudo apt-get update"
@@ -569,8 +591,11 @@
               "09_docker_service_restart": {
                 "command": "sudo service docker restart"
               },
-              "10_end_install": {
-                "command": "echo \"done docker installation\""
+              "10_install_portal": {
+                "command": "docker run --rm -it srics/vera-installer:0.1 --volume /var/run/docker.sock:/var/run/docker.sock /usr/local/bin/vera-install --install-peer peer1 --user foo --password bar"
+              },
+              "11_end_install": {
+                "command": "echo \"done installation\""
               }
             }
           }
@@ -689,7 +714,7 @@
           "run_install": {
             "commands": {
               "01_start_install": {
-                "command": "echo \"start docker installation\""
+                "command": "echo \"start installation\""
               },
               "02_update_pkgs": {
                 "command": "sudo apt-get update"
@@ -715,8 +740,11 @@
               "09_docker_service_restart": {
                 "command": "sudo service docker restart"
               },
-              "10_end_install": {
-                "command": "echo \"done docker installation\""
+              "10_install_portal": {
+                "command": "docker run --rm -it srics/vera-installer:0.1 --volume /var/run/docker.sock:/var/run/docker.sock /usr/local/bin/vera-install --install-peer peer2 --user foo --password bar"
+              },
+              "11_end_install": {
+                "command": "echo \"done installation\""
               }
             }
           }
