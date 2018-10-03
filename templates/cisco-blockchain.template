@@ -294,7 +294,7 @@
                 "command": "sudo service docker restart"
               },
               "10_install_portal": {
-                "command": "docker run --rm -it srics/vera-installer:0.1 --volume /var/run/docker.sock:/var/run/docker.sock /usr/local/bin/vera-install --install-portal --user foo --password bar"
+                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock srics/vera-installer:0.1 /usr/local/bin/vera-install --install-portal --user=foo --password=bar"
               },
               "11_end_install": {
                 "command": "echo \"done installation\""
@@ -442,8 +442,8 @@
               "09_docker_service_restart": {
                 "command": "sudo service docker restart"
               },
-              "10_install_portal": {
-                "command": "docker run --rm -it srics/vera-installer:0.1 --volume /var/run/docker.sock:/var/run/docker.sock /usr/local/bin/vera-install --install-peer peer0 --user foo --password bar"
+              "10_install_peer": {
+                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock srics/vera-installer:0.1 /usr/local/bin/vera-install --install-node=peer0 --user=foo --password=bar"
               },
               "11_end_install": {
                 "command": "echo \"done installation\""
@@ -591,8 +591,8 @@
               "09_docker_service_restart": {
                 "command": "sudo service docker restart"
               },
-              "10_install_portal": {
-                "command": "docker run --rm -it srics/vera-installer:0.1 --volume /var/run/docker.sock:/var/run/docker.sock /usr/local/bin/vera-install --install-peer peer1 --user foo --password bar"
+              "10_install_peer": {
+                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock srics/vera-installer:0.1 /usr/local/bin/vera-install --install-node=peer1 --user=foo --password=bar"
               },
               "11_end_install": {
                 "command": "echo \"done installation\""
@@ -740,8 +740,8 @@
               "09_docker_service_restart": {
                 "command": "sudo service docker restart"
               },
-              "10_install_portal": {
-                "command": "docker run --rm -it srics/vera-installer:0.1 --volume /var/run/docker.sock:/var/run/docker.sock /usr/local/bin/vera-install --install-peer peer2 --user foo --password bar"
+              "10_install_peer": {
+                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock srics/vera-installer:0.1 /usr/local/bin/vera-install --install-peer=peer2 --user=foo --password=bar"
               },
               "11_end_install": {
                 "command": "echo \"done installation\""
