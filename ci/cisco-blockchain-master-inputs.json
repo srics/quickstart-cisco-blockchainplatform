@@ -1,7 +1,7 @@
 [
     {
         "ParameterKey": "AvailabilityZones",
-        "ParameterValue": "$[taskcat_genaz_2]"
+        "ParameterValue": "$[taskcat_genaz_3]"
     },
     {
         "ParameterKey": "InstanceType",
@@ -13,7 +13,19 @@
     },
     {
         "ParameterKey": "NumberOfAZs",
-        "ParameterValue": "2"
+        "ParameterValue": "3"
+    },
+    {
+        "ParameterKey": "PrivateSubnet1CIDR",
+        "ParameterValue": "10.0.0.0/20"
+    },
+    {
+        "ParameterKey": "PrivateSubnet2CIDR",
+        "ParameterValue": "10.0.16.0/20"
+    },
+    {
+        "ParameterKey": "PrivateSubnet3CIDR",
+        "ParameterValue": "10.0.32.0/20"
     },
     {
         "ParameterKey": "PublicSubnet1CIDR",
@@ -22,6 +34,10 @@
     {
         "ParameterKey": "PublicSubnet2CIDR",
         "ParameterValue": "10.0.144.0/20"
+    },
+    {
+        "ParameterKey": "PublicSubnet3CIDR",
+        "ParameterValue": "10.0.160.0/20"
     },
     {
         "ParameterKey": "QSS3BucketName",
@@ -38,5 +54,13 @@
     {
         "ParameterKey": "VPCCIDR",
         "ParameterValue": "10.0.0.0/16"
+    },
+    {
+        "ParameterKey": "DockerHubID",
+        "ParameterValue": "test"
+    },
+    {
+        "ParameterKey": "DockerHubKey",
+        "ParameterValue": "test"
     }
 ]

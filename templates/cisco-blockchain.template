@@ -12,6 +12,10 @@
             "VPCID",
             "PublicSubnet1ID",
             "PublicSubnet2ID",
+            "PublicSubnet3ID",
+            "PrivateSubnet1ID",
+            "PrivateSubnet2ID",
+            "PrivateSubnet3ID",
             "RemoteAccessCIDR"
           ]
         },
@@ -43,6 +47,21 @@
         },
         "PublicSubnet1ID": {
           "default": "Public Subnet 1 ID"
+        },
+        "PublicSubnet2ID": {
+          "default": "Public Subnet 2 ID"
+        },
+        "PublicSubnet3ID": {
+          "default": "Public Subnet 3 ID"
+        },
+        "PrivateSubnet1ID": {
+          "default": "Private Subnet 1 ID"
+        },
+        "PrivateSubnet2ID": {
+          "default": "Private Subnet 2 ID"
+        },
+        "PrivateSubnet3ID": {
+          "default": "Private Subnet 3 ID"
         },
         "QSS3BucketName": {
           "default": "Quick Start S3 Bucket Name"
@@ -97,6 +116,22 @@
     },
     "PublicSubnet2ID": {
       "Description": "ID of the public subnet 2 you want to provision the second bastion into (e.g., subnet-e3246d8e)",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "PublicSubnet3ID": {
+      "Description": "ID of the public subnet 3 you want to provision the second bastion into (e.g., subnet-b1f4a2cd)",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "PrivateSubnet1ID": {
+      "Description": "ID of the private subnet 1 in Availability Zone 1 (e.g., subnet-a0246dcd)",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "PrivateSubnet2ID": {
+      "Description": "ID of the private subnet 2 in Availability Zone 2 (e.g., subnet-e3246d8e)",
+      "Type": "AWS::EC2::Subnet::Id"
+    },
+    "PrivateSubnet3ID": {
+      "Description": "ID of the private subnet 3 in Availability Zone 3 (e.g., subnet-b1f4a2cd)",
       "Type": "AWS::EC2::Subnet::Id"
     },
     "QSS3BucketName": {
@@ -238,8 +273,40 @@
           },
           {
             "IpProtocol": "tcp",
-            "FromPort": "10000",
-            "ToPort": "10000",
+            "FromPort": "9000",
+            "ToPort": "9000",
+            "CidrIp": {
+              "Ref": "BlockChainAccessCIDR"
+            }
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "9010",
+            "ToPort": "9010",
+            "CidrIp": {
+              "Ref": "BlockChainAccessCIDR"
+            }
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "9020",
+            "ToPort": "9020",
+            "CidrIp": {
+              "Ref": "BlockChainAccessCIDR"
+            }
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "9030",
+            "ToPort": "9030",
+            "CidrIp": {
+              "Ref": "BlockChainAccessCIDR"
+            }
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "9090",
+            "ToPort": "9090",
             "CidrIp": {
               "Ref": "BlockChainAccessCIDR"
             }
@@ -474,7 +541,7 @@
           }
         ],
         "SubnetId": {
-          "Ref": "PublicSubnet1ID"
+          "Ref": "PrivateSubnet1ID"
         },
         "Tags": [
           {
@@ -623,7 +690,7 @@
           }
         ],
         "SubnetId": {
-          "Ref": "PublicSubnet1ID"
+          "Ref": "PrivateSubnet2ID"
         },
         "Tags": [
           {
@@ -772,7 +839,7 @@
           }
         ],
         "SubnetId": {
-          "Ref": "PublicSubnet1ID"
+          "Ref": "PrivateSubnet3ID"
         },
         "Tags": [
           {
@@ -850,6 +917,265 @@
           }
         }
       }
+    },
+    "PeerMasterELB": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Subnets": [
+          {
+            "Ref": "PublicSubnet1ID"
+          },
+          {
+            "Ref": "PublicSubnet2ID"
+          },
+          {
+            "Ref": "PublicSubnet3ID"
+          } 
+        ],
+        "Type": "network",
+        "LoadBalancerAttributes": [
+          {
+            "Key": "load_balancing.cross_zone.enabled",
+            "Value": "true"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "NLB"
+          }
+        ]
+      }
+    },
+    "Peer0ELBTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "Peer0"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 9090,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer0ELBTargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id" : {
+              "Fn::GetAtt": [
+                "Peer0",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Peer1ELBTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "Peer1"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 9090,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer1ELBTargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id" : {
+              "Fn::GetAtt": [
+                "Peer1",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Peer2ELBTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "Peer2"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 9090,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer2ELBTargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id" : {
+              "Fn::GetAtt": [
+                "Peer2",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "PeerExternalELBTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "Peer0",
+        "Peer1",
+        "Peer2"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 9090,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "PeerExternalELBTargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id" : {
+              "Fn::GetAtt": [
+                "Peer0",
+                "PrivateIp"
+              ]
+            }
+          },
+          {
+            "Id" : {
+              "Fn::GetAtt": [
+                "Peer1",
+                "PrivateIp"
+              ]
+            }
+          },
+          {
+            "Id" : {
+              "Fn::GetAtt": [
+                "Peer2",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Peer0ELBListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "Peer0ELBTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "PeerMasterELB"
+        },
+        "Port": 9010,
+        "Protocol": "TCP"
+      }
+    },
+    "Peer1ELBListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "Peer1ELBTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "PeerMasterELB"
+        },
+        "Port": 9020,
+        "Protocol": "TCP"
+      }
+    },
+    "Peer2ELBListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "Peer2ELBTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "PeerMasterELB"
+        },
+        "Port": 9030,
+        "Protocol": "TCP"
+      }
+    },
+    "PeerExternalELBListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "PeerExternalELBTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "PeerMasterELB"
+        },
+        "Port": 9000,
+        "Protocol": "TCP"
+      }
     }
   },
   "Outputs": {
@@ -877,11 +1203,11 @@
       },
       "Description": "Public DNS Name for the Peer0 Instance"
     },
-    "Peer0PublicIPAddress": {
+    "Peer0PrivateIPAddress": {
       "Value": {
-        "Fn::Sub": "ubuntu@${Peer0.PublicIp}"
+        "Fn::Sub": "{Peer0.PrivateIp}"
       },
-      "Description": "Public IP address for the Peer0 instance"
+      "Description": "Private IP address for the Peer0 instance"
     },
     "Peer1PublicDnsName": {
       "Value": {
@@ -892,11 +1218,11 @@
       },
       "Description": "Public DNS Name for the Peer1 Instance"
     },
-    "Peer1PublicIPAddress": {
+    "Peer1PrivateIPAddress": {
       "Value": {
-        "Fn::Sub": "ubuntu@${Peer1.PublicIp}"
+        "Fn::Sub": "{Peer1.PrivateIp}"
       },
-      "Description": "Public IP address for the Peer1 instance"
+      "Description": "Private IP address for the Peer1 instance"
     },
     "Peer2PublicDnsName": {
       "Value": {
@@ -907,11 +1233,24 @@
       },
       "Description": "Public DNS Name for the Peer2 Instance"
     },
-    "Peer2PublicIPAddress": {
+    "Peer2PrivateIPAddress": {
       "Value": {
-        "Fn::Sub": "ubuntu@${Peer2.PublicIp}"
+        "Fn::Sub": "{Peer2.PrivateIp}"
       },
-      "Description": "Public IP address for the Peer2 instance"
+      "Description": "Private IP address for the Peer2 instance"
+    },
+    "PeerMasterELB": {
+      "Value": {
+        "Fn::GetAtt": [
+          "PeerMasterELB" , "DNSName"
+        ]
+      },
+      "Description": "Peer Internet Network Load Balancer Name",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-PeerELB"
+        }
+      }
     }
   }
 }
