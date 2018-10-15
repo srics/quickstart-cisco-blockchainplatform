@@ -11,8 +11,12 @@
           "Parameters": [
             "AvailabilityZones",
             "NumberOfAZs",
+            "PrivateSubnet1CIDR",
+            "PrivateSubnet2CIDR",
+            "PrivateSubnet3CIDR",
             "PublicSubnet1CIDR",
             "PublicSubnet2CIDR",
+            "PublicSubnet3CIDR",
             "RemoteAccessCIDR",
             "BlockChainAccessCIDR",
             "VPCCIDR"
@@ -44,11 +48,23 @@
         }
       ],
       "ParameterLabels": {
+        "PrivateSubnet1CIDR": {
+          "default": "Private Subnet 1 CIDR"
+        },
+        "PrivateSubnet2CIDR": {
+          "default": "Private Subnet 2 CIDR"
+        },
+        "PrivateSubnet3CIDR": {
+          "default": "Private Subnet 3 CIDR"
+        },
         "PublicSubnet1CIDR": {
           "default": "Public Subnet 1 CIDR"
         },
         "PublicSubnet2CIDR": {
           "default": "Public Subnet 2 CIDR"
+        },
+        "PublicSubnet3CIDR": {
+          "default": "Public Subnet 3 CIDR"
         },
         "QSS3BucketName": {
           "default": "Quick Start S3 Bucket Name"
@@ -126,6 +142,27 @@
       "Description": "Number of Availability Zones to use in the VPC. This must match your selections in the list of Availability Zones parameter.",
       "Type": "String"
     },
+    "PrivateSubnet1CIDR": {
+      "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
+      "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
+      "Default": "10.0.0.0/20",
+      "Description": "CIDR block for the private subnet 1 located in Availability Zone 1",
+      "Type": "String"
+    },
+    "PrivateSubnet2CIDR": {
+      "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
+      "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
+      "Default": "10.0.16.0/20",
+      "Description": "CIDR block for the private subnet 2 located in Availability Zone 2",
+      "Type": "String"
+    },
+    "PrivateSubnet3CIDR": {
+      "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
+      "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
+      "Default": "10.0.32.0/20",
+      "Description": "CIDR block for the private subnet 3 located in Availability Zone 3",
+      "Type": "String"
+    },
     "PublicSubnet1CIDR": {
       "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
       "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
@@ -138,6 +175,13 @@
       "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
       "Default": "10.0.144.0/20",
       "Description": "CIDR block for the public (DMZ) subnet 2 located in Availability Zone 2",
+      "Type": "String"
+    },
+    "PublicSubnet3CIDR": {
+      "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
+      "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/16-28",
+      "Default": "10.0.160.0/20",
+      "Description": "CIDR block for the public (DMZ) subnet 3 located in Availability Zone 3",
       "Type": "String"
     },
     "QSS3BucketName": {
@@ -164,6 +208,14 @@
       "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
       "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
       "Description": "The CIDR IP range that is permitted to access the instances We recommend that you set this value to a trusted IP range.",
+      "Type": "String"
+    },
+    "DockerHubID": {
+      "Description": "The name of the dockerhub account ID, which allows you to access the required container images of the product",
+      "Type": "String"
+    },
+    "DockerHubKey": {
+      "Description": "The key or the password of the dockerhub account ID, which allows you to access the required container images of the product",
       "Type": "String"
     },
     "DockerHubID": {
@@ -219,15 +271,26 @@
               }
             ]
           },
-          "CreatePrivateSubnets": false,
           "KeyPairName": {
             "Ref": "KeyPairName"
+          },
+          "PrivateSubnet1ACIDR": {
+            "Ref": "PrivateSubnet1CIDR"
+          },
+          "PrivateSubnet2ACIDR": {
+            "Ref": "PrivateSubnet2CIDR"
+          },
+          "PrivateSubnet3ACIDR": {
+            "Ref": "PrivateSubnet3CIDR"
           },
           "PublicSubnet1CIDR": {
             "Ref": "PublicSubnet1CIDR"
           },
           "PublicSubnet2CIDR": {
             "Ref": "PublicSubnet2CIDR"
+          },
+          "PublicSubnet3CIDR": {
+            "Ref": "PublicSubnet3CIDR"
           },
           "VPCCIDR": {
             "Ref": "VPCCIDR"
@@ -262,6 +325,30 @@
             "Fn::GetAtt": [
               "VPCStack",
               "Outputs.PublicSubnet2ID"
+            ]
+          },
+          "PublicSubnet3ID": {
+            "Fn::GetAtt": [
+              "VPCStack",
+              "Outputs.PublicSubnet3ID"
+            ]
+          },
+          "PrivateSubnet1ID": {
+            "Fn::GetAtt": [
+              "VPCStack",
+              "Outputs.PrivateSubnet1AID"
+            ]
+          },
+          "PrivateSubnet2ID": {
+            "Fn::GetAtt": [
+              "VPCStack",
+              "Outputs.PrivateSubnet2AID"
+            ]
+          },
+          "PrivateSubnet3ID": {
+            "Fn::GetAtt": [
+              "VPCStack",
+              "Outputs.PrivateSubnet3AID"
             ]
           },
           "QSS3BucketName": {
