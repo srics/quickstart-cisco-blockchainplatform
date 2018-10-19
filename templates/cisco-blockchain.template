@@ -290,6 +290,90 @@
         ]
       }
     },
+    "S3BucketPrivate" : {
+      "Type" : "AWS::S3::Bucket",
+      "Properties" : {
+        "AccessControl" : "Private"
+      }
+    },
+    "PeerInstanceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/"
+      }
+    },
+    "PeerInstancePolicy" : {
+      "Type" : "AWS::IAM::Policy",
+      "DependsOn": [
+        "S3BucketPrivate"
+      ],
+      "Properties" : {
+        "PolicyName" : "S3Policy",
+        "PolicyDocument" : {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:ListBucket"
+              ],
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "S3BucketPrivate",
+                    "Arn"
+                  ]
+                }
+              ]
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject"
+              ],
+              "Resource": [
+                {
+                  "Fn::Sub": "${S3BucketPrivate.Arn}/*"
+                }
+              ]
+            }
+          ]
+        },
+        "Roles" : [
+          {
+            "Ref" : "PeerInstanceRole"
+          }
+        ]
+      }
+    },
+    "PeerInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref" : "PeerInstanceRole"
+          }
+        ]
+      }
+    },
     "AdminPortal": {
       "Type": "AWS::EC2::Instance",
       "Metadata": {
@@ -511,6 +595,9 @@
         "SubnetId": {
           "Ref": "PrivateSubnet1ID"
         },
+        "IamInstanceProfile": {
+          "Ref": "PeerInstanceProfile"
+        },
         "Tags": [
           {
             "Key": "Name",
@@ -660,6 +747,9 @@
         "SubnetId": {
           "Ref": "PrivateSubnet2ID"
         },
+        "IamInstanceProfile": {
+          "Ref": "PeerInstanceProfile"
+        },
         "Tags": [
           {
             "Key": "Name",
@@ -808,6 +898,9 @@
         ],
         "SubnetId": {
           "Ref": "PrivateSubnet3ID"
+        },
+        "IamInstanceProfile": {
+          "Ref": "PeerInstanceProfile"
         },
         "Tags": [
           {
@@ -1224,7 +1317,10 @@
     },
     "Peer0PrivateIPAddress": {
       "Value": {
-        "Fn::Sub": "{Peer0.PrivateIp}"
+        "Fn::GetAtt": [
+          "Peer0",
+          "PrivateIp"
+        ]
       },
       "Description": "Private IP address for the Peer0 instance"
     },
@@ -1239,7 +1335,10 @@
     },
     "Peer1PrivateIPAddress": {
       "Value": {
-        "Fn::Sub": "{Peer1.PrivateIp}"
+        "Fn::GetAtt": [
+          "Peer1",
+          "PrivateIp"
+        ]
       },
       "Description": "Private IP address for the Peer1 instance"
     },
@@ -1254,7 +1353,10 @@
     },
     "Peer2PrivateIPAddress": {
       "Value": {
-        "Fn::Sub": "{Peer2.PrivateIp}"
+        "Fn::GetAtt": [
+          "Peer2",
+          "PrivateIp"
+        ]
       },
       "Description": "Private IP address for the Peer2 instance"
     },
@@ -1309,6 +1411,15 @@
           "Fn::Sub": "${AWS::StackName}-Peer2ELB"
         }
       }
+    },
+    "PeerInstanceRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "PeerInstanceRole",
+          "Arn"
+        ]
+      },
+      "Description": "Peer Instance Role Arn"
     }
   }
 }
