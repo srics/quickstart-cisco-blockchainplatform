@@ -162,47 +162,8 @@
       "AMI": {
         "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180405"
       },
-      "ap-northeast-1": {
-        "US1604HVM": "ami-60a4b21c"
-      },
-      "ap-northeast-2": {
-        "US1604HVM": "ami-633d920d"
-      },
-      "ap-south-1": {
-        "US1604HVM": "ami-dba580b4"
-      },
-      "ap-southeast-1": {
-        "US1604HVM": "ami-82c9ecfe"
-      },
-      "ap-southeast-2": {
-        "US1604HVM": "ami-2b12dc49"
-      },
-      "ca-central-1": {
-        "US1604HVM": "ami-9d7afcf9"
-      },
-      "eu-central-1": {
-        "US1604HVM": "ami-cd491726"
-      },
-      "eu-west-1": {
-        "US1604HVM": "ami-74e6b80d"
-      },
-      "eu-west-2": {
-        "US1604HVM": "ami-506e8f37"
-      },
-      "sa-east-1": {
-        "US1604HVM": "ami-5782d43b"
-      },
       "us-east-1": {
-        "US1604HVM": "ami-6dfe5010"
-      },
-      "us-east-2": {
-        "US1604HVM": "ami-e82a1a8d"
-      },
-      "us-west-1": {
-        "US1604HVM": "ami-493f2f29"
-      },
-      "us-west-2": {
-        "US1604HVM": "ami-ca89eeb2"
+        "US1604HVM": "ami-0c17b8bc707a9ba1d"
       }
     }
   },
