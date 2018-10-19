@@ -273,38 +273,6 @@
           },
           {
             "IpProtocol": "tcp",
-            "FromPort": "9000",
-            "ToPort": "9000",
-            "CidrIp": {
-              "Ref": "BlockChainAccessCIDR"
-            }
-          },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "9010",
-            "ToPort": "9010",
-            "CidrIp": {
-              "Ref": "BlockChainAccessCIDR"
-            }
-          },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "9020",
-            "ToPort": "9020",
-            "CidrIp": {
-              "Ref": "BlockChainAccessCIDR"
-            }
-          },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "9030",
-            "ToPort": "9030",
-            "CidrIp": {
-              "Ref": "BlockChainAccessCIDR"
-            }
-          },
-          {
-            "IpProtocol": "tcp",
             "FromPort": "9090",
             "ToPort": "9090",
             "CidrIp": {
@@ -918,7 +886,7 @@
         }
       }
     },
-    "PeerMasterELB": {
+    "ExternalELB": {
       "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
       "Properties": {
         "Subnets": [
@@ -942,7 +910,58 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "NLB"
+            "Value": "ExternalNLB"
+          }
+        ]
+      }
+    },
+    "Peer0ELB": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Subnets": [
+          {
+            "Ref": "PublicSubnet1ID"
+          }
+        ],
+        "Type": "network",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer0NLB"
+          }
+        ]
+      }
+    },
+    "Peer1ELB": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Subnets": [
+          {
+            "Ref": "PublicSubnet2ID"
+          }
+        ],
+        "Type": "network",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer1NLB"
+          }
+        ]
+      }
+    },
+    "Peer2ELB": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Subnets": [
+          {
+            "Ref": "PublicSubnet3ID"
+          } 
+        ],
+        "Type": "network",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer2NLB"
           }
         ]
       }
@@ -1052,7 +1071,7 @@
         ]
       }
     },
-    "PeerExternalELBTargetGroup": {
+    "ExternalELBTargetGroup": {
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
       "DependsOn": [
         "Peer0",
@@ -1073,7 +1092,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": "PeerExternalELBTargetGroup"
+            "Value": "ExternalELBTargetGroup"
           }
         ],
         "TargetType": "ip",
@@ -1117,9 +1136,9 @@
           }
         ],
         "LoadBalancerArn": {
-          "Ref": "PeerMasterELB"
+          "Ref": "Peer0ELB"
         },
-        "Port": 9010,
+        "Port": 9090,
         "Protocol": "TCP"
       }
     },
@@ -1135,9 +1154,9 @@
           }
         ],
         "LoadBalancerArn": {
-          "Ref": "PeerMasterELB"
+          "Ref": "Peer1ELB"
         },
-        "Port": 9020,
+        "Port": 9090,
         "Protocol": "TCP"
       }
     },
@@ -1153,27 +1172,27 @@
           }
         ],
         "LoadBalancerArn": {
-          "Ref": "PeerMasterELB"
+          "Ref": "Peer2ELB"
         },
-        "Port": 9030,
+        "Port": 9090,
         "Protocol": "TCP"
       }
     },
-    "PeerExternalELBListener": {
+    "ExternalELBListener": {
       "Type": "AWS::ElasticLoadBalancingV2::Listener",
       "Properties": {
         "DefaultActions": [
           {
             "Type": "forward",
             "TargetGroupArn": {
-              "Ref": "PeerExternalELBTargetGroup"
+              "Ref": "ExternalELBTargetGroup"
             }
           }
         ],
         "LoadBalancerArn": {
-          "Ref": "PeerMasterELB"
+          "Ref": "ExternalELB"
         },
-        "Port": 9000,
+        "Port": 9090,
         "Protocol": "TCP"
       }
     }
@@ -1239,16 +1258,55 @@
       },
       "Description": "Private IP address for the Peer2 instance"
     },
-    "PeerMasterELB": {
+    "ExternalELB": {
       "Value": {
         "Fn::GetAtt": [
-          "PeerMasterELB" , "DNSName"
+          "ExternalELB" , "DNSName"
         ]
       },
-      "Description": "Peer Internet Network Load Balancer Name",
+      "Description": "External Network Load Balancer Name",
       "Export": {
         "Name": {
-          "Fn::Sub": "${AWS::StackName}-PeerELB"
+          "Fn::Sub": "${AWS::StackName}-ExternalELB"
+        }
+      }
+    },
+    "Peer0ELB": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Peer0ELB" , "DNSName"
+        ]
+      },
+      "Description": "Peer0 Network Load Balancer Name",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Peer0ELB"
+        }
+      }
+    },
+    "Peer1ELB": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Peer1ELB" , "DNSName"
+        ]
+      },
+      "Description": "Peer1 Network Load Balancer Name",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Peer1ELB"
+        }
+      }
+    },
+    "Peer2ELB": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Peer2ELB" , "DNSName"
+        ]
+      },
+      "Description": "Peer2 Network Load Balancer Name",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Peer2ELB"
         }
       }
     }
