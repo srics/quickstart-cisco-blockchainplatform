@@ -343,34 +343,10 @@
               "01_start_install": {
                 "command": "echo \"start installation\""
               },
-              "02_update_pkgs": {
-                "command": "sudo apt-get update"
+              "02_install_portal": {
+                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock ciscoblockchain/vera_installer:latest /usr/local/bin/vera-install --version"
               },
-              "03_install_pkgs": {
-                "command": "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common"
-              },
-              "04_install_gpg_key": {
-                "command": "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
-              },
-              "05_add_docker_repo": {
-                "command": "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""
-              },
-              "06_update_pkgs": {
-                "command": "sudo apt-get update"
-              },
-              "07_install_docker": {
-                "command": "sudo apt-get install -y docker-ce docker-compose"
-              },
-              "08_docker_user_group": {
-                "command": "sudo usermod -aG docker ubuntu"
-              },
-              "09_docker_service_restart": {
-                "command": "sudo service docker restart"
-              },
-              "10_install_portal": {
-                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock srics/vera-installer:0.1 /usr/local/bin/vera-install --install-portal --user=foo --password=bar"
-              },
-              "11_end_install": {
+              "03_end_install": {
                 "command": "echo \"done installation\""
               }
             }
@@ -492,34 +468,10 @@
               "01_start_install": {
                 "command": "echo \"start installation\""
               },
-              "02_update_pkgs": {
-                "command": "sudo apt-get update"
+              "02_install_portal": {
+                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock ciscoblockchain/vera_installer:latest /usr/local/bin/vera-install --version"
               },
-              "03_install_pkgs": {
-                "command": "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common"
-              },
-              "04_install_gpg_key": {
-                "command": "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
-              },
-              "05_add_docker_repo": {
-                "command": "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""
-              },
-              "06_update_pkgs": {
-                "command": "sudo apt-get update"
-              },
-              "07_install_docker": {
-                "command": "sudo apt-get install -y docker-ce docker-compose"
-              },
-              "08_docker_user_group": {
-                "command": "sudo usermod -aG docker ubuntu"
-              },
-              "09_docker_service_restart": {
-                "command": "sudo service docker restart"
-              },
-              "10_install_peer": {
-                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock srics/vera-installer:0.1 /usr/local/bin/vera-install --install-node=peer0 --user=foo --password=bar"
-              },
-              "11_end_install": {
+              "03_end_install": {
                 "command": "echo \"done installation\""
               }
             }
@@ -644,34 +596,10 @@
               "01_start_install": {
                 "command": "echo \"start installation\""
               },
-              "02_update_pkgs": {
-                "command": "sudo apt-get update"
+              "02_install_portal": {
+                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock ciscoblockchain/vera_installer:latest /usr/local/bin/vera-install --version"
               },
-              "03_install_pkgs": {
-                "command": "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common"
-              },
-              "04_install_gpg_key": {
-                "command": "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
-              },
-              "05_add_docker_repo": {
-                "command": "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""
-              },
-              "06_update_pkgs": {
-                "command": "sudo apt-get update"
-              },
-              "07_install_docker": {
-                "command": "sudo apt-get install -y docker-ce docker-compose"
-              },
-              "08_docker_user_group": {
-                "command": "sudo usermod -aG docker ubuntu"
-              },
-              "09_docker_service_restart": {
-                "command": "sudo service docker restart"
-              },
-              "10_install_peer": {
-                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock srics/vera-installer:0.1 /usr/local/bin/vera-install --install-node=peer1 --user=foo --password=bar"
-              },
-              "11_end_install": {
+              "03_end_install": {
                 "command": "echo \"done installation\""
               }
             }
@@ -796,34 +724,10 @@
               "01_start_install": {
                 "command": "echo \"start installation\""
               },
-              "02_update_pkgs": {
-                "command": "sudo apt-get update"
+              "02_install_portal": {
+                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock ciscoblockchain/vera_installer:latest /usr/local/bin/vera-install --version"
               },
-              "03_install_pkgs": {
-                "command": "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common"
-              },
-              "04_install_gpg_key": {
-                "command": "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
-              },
-              "05_add_docker_repo": {
-                "command": "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""
-              },
-              "06_update_pkgs": {
-                "command": "sudo apt-get update"
-              },
-              "07_install_docker": {
-                "command": "sudo apt-get install -y docker-ce docker-compose"
-              },
-              "08_docker_user_group": {
-                "command": "sudo usermod -aG docker ubuntu"
-              },
-              "09_docker_service_restart": {
-                "command": "sudo service docker restart"
-              },
-              "10_install_peer": {
-                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock srics/vera-installer:0.1 /usr/local/bin/vera-install --install-peer=peer2 --user=foo --password=bar"
-              },
-              "11_end_install": {
+              "03_end_install": {
                 "command": "echo \"done installation\""
               }
             }
