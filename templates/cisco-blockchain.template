@@ -242,7 +242,7 @@
         "BucketEncryption": {
           "ServerSideEncryptionConfiguration": [
             {
-              "ServerSideEncryptionByDefault": 
+              "ServerSideEncryptionByDefault":
               {
                 "SSEAlgorithm": "AES256"
               }
@@ -273,14 +273,14 @@
         "Path": "/"
       }
     },
-    "PeerInstancePolicy" : {
-      "Type" : "AWS::IAM::Policy",
+    "PeerInstancePolicy": {
+      "Type": "AWS::IAM::Policy",
       "DependsOn": [
         "S3BucketPrivate"
       ],
-      "Properties" : {
-        "PolicyName" : "S3Policy",
-        "PolicyDocument" : {
+      "Properties": {
+        "PolicyName": "S3Policy",
+        "PolicyDocument": {
           "Statement": [
             {
               "Effect": "Allow",
@@ -311,9 +311,9 @@
             }
           ]
         },
-        "Roles" : [
+        "Roles": [
           {
-            "Ref" : "PeerInstanceRole"
+            "Ref": "PeerInstanceRole"
           }
         ]
       }
@@ -324,7 +324,7 @@
         "Path": "/",
         "Roles": [
           {
-            "Ref" : "PeerInstanceRole"
+            "Ref": "PeerInstanceRole"
           }
         ]
       }
@@ -464,6 +464,24 @@
             ]
           },
           "run_install": {
+            "files": {
+              "/home/ubuntu/installer/env": {
+                "content": { "Fn::Join" : [ "", [
+                    "PEER_HOST=", { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, "\n",
+                    "GENESIS_PEERS=",
+                      { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
+                      { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
+                      { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
+                    "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
+                    "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
+                    ]
+                  ]
+                },
+                "mode": "000644",
+                "owner": "root",
+                "group": "root"
+              }
+            },
             "commands": {
               "01_start_install": {
                 "command": "echo \"start installation\""
@@ -471,7 +489,7 @@
               "02_install_portal": {
                 "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock ciscoblockchain/vera_installer:latest /usr/local/bin/vera-install --version"
               },
-              "03_end_install": {
+              "10_end_install": {
                 "command": "echo \"done installation\""
               }
             }
@@ -592,6 +610,24 @@
             ]
           },
           "run_install": {
+            "files": {
+              "/home/ubuntu/installer/env": {
+                "content": { "Fn::Join" : [ "", [
+                    "PEER_HOST=", { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, "\n",
+                    "GENESIS_PEERS=",
+                      { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
+                      { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
+                      { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
+                    "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
+                    "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
+                    ]
+                  ]
+                },
+                "mode": "000644",
+                "owner": "root",
+                "group": "root"
+              }
+            },
             "commands": {
               "01_start_install": {
                 "command": "echo \"start installation\""
@@ -720,6 +756,24 @@
             ]
           },
           "run_install": {
+            "files": {
+              "/home/ubuntu/installer/env": {
+                "content": { "Fn::Join" : [ "", [
+                    "PEER_HOST=", { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, "\n",
+                    "GENESIS_PEERS=",
+                      { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
+                      { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
+                      { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
+                    "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
+                    "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
+                    ]
+                  ]
+                },
+                "mode": "000644",
+                "owner": "root",
+                "group": "root"
+              }
+            },
             "commands": {
               "01_start_install": {
                 "command": "echo \"start installation\""
@@ -907,7 +961,7 @@
         "Subnets": [
           {
             "Ref": "PublicSubnet3ID"
-          } 
+          }
         ],
         "Type": "network",
         "Tags": [
@@ -943,7 +997,7 @@
         "TargetType": "ip",
         "Targets": [
           {
-            "Id" : {
+            "Id": {
               "Fn::GetAtt": [
                 "Peer0",
                 "PrivateIp"
@@ -978,7 +1032,7 @@
         "TargetType": "ip",
         "Targets": [
           {
-            "Id" : {
+            "Id": {
               "Fn::GetAtt": [
                 "Peer1",
                 "PrivateIp"
@@ -1013,7 +1067,7 @@
         "TargetType": "ip",
         "Targets": [
           {
-            "Id" : {
+            "Id": {
               "Fn::GetAtt": [
                 "Peer2",
                 "PrivateIp"
@@ -1050,7 +1104,7 @@
         "TargetType": "ip",
         "Targets": [
           {
-            "Id" : {
+            "Id": {
               "Fn::GetAtt": [
                 "Peer0",
                 "PrivateIp"
@@ -1058,7 +1112,7 @@
             }
           },
           {
-            "Id" : {
+            "Id": {
               "Fn::GetAtt": [
                 "Peer1",
                 "PrivateIp"
@@ -1066,7 +1120,7 @@
             }
           },
           {
-            "Id" : {
+            "Id": {
               "Fn::GetAtt": [
                 "Peer2",
                 "PrivateIp"
@@ -1222,7 +1276,8 @@
     "ExternalELB": {
       "Value": {
         "Fn::GetAtt": [
-          "ExternalELB" , "DNSName"
+          "ExternalELB",
+          "DNSName"
         ]
       },
       "Description": "External Network Load Balancer Name",
@@ -1235,7 +1290,8 @@
     "Peer0ELB": {
       "Value": {
         "Fn::GetAtt": [
-          "Peer0ELB" , "DNSName"
+          "Peer0ELB",
+          "DNSName"
         ]
       },
       "Description": "Peer0 Network Load Balancer Name",
@@ -1248,7 +1304,8 @@
     "Peer1ELB": {
       "Value": {
         "Fn::GetAtt": [
-          "Peer1ELB" , "DNSName"
+          "Peer1ELB",
+          "DNSName"
         ]
       },
       "Description": "Peer1 Network Load Balancer Name",
@@ -1261,7 +1318,8 @@
     "Peer2ELB": {
       "Value": {
         "Fn::GetAtt": [
-          "Peer2ELB" , "DNSName"
+          "Peer2ELB",
+          "DNSName"
         ]
       },
       "Description": "Peer2 Network Load Balancer Name",
