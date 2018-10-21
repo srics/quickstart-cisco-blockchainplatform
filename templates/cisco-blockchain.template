@@ -613,7 +613,7 @@
             "files": {
               "/home/ubuntu/installer/env": {
                 "content": { "Fn::Join" : [ "", [
-                    "PEER_HOST=", { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, "\n",
+                    "PEER_HOST=", { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, "\n",
                     "GENESIS_PEERS=",
                       { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
@@ -759,7 +759,7 @@
             "files": {
               "/home/ubuntu/installer/env": {
                 "content": { "Fn::Join" : [ "", [
-                    "PEER_HOST=", { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, "\n",
+                    "PEER_HOST=", { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
                     "GENESIS_PEERS=",
                       { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
