@@ -225,6 +225,14 @@
             }
           },
           {
+            "IpProtocol": "tcp",
+            "FromPort": "12379",
+            "ToPort": "12379",
+            "CidrIp": {
+              "Ref": "BlockChainAccessCIDR"
+            }
+          },
+          {
             "IpProtocol": "icmp",
             "FromPort": "-1",
             "ToPort": "-1",
@@ -1077,6 +1085,216 @@
         ]
       }
     },
+    "Peer0RAFTTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "Peer0"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 12379,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer0RAFTTargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id": {
+              "Fn::GetAtt": [
+                "Peer0",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Peer1RAFTTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "Peer1"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 12379,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer1RAFTTargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id": {
+              "Fn::GetAtt": [
+                "Peer1",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Peer2RAFTTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "Peer2"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 12379,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer2RAFTTargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id": {
+              "Fn::GetAtt": [
+                "Peer2",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Peer0SSHTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "Peer0"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 22,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer0SSHTargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id": {
+              "Fn::GetAtt": [
+                "Peer0",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Peer1SSHTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "Peer1"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 22,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer1SSHTargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id": {
+              "Fn::GetAtt": [
+                "Peer1",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Peer2SSHTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "Peer2"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 22,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer2SSHTargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id": {
+              "Fn::GetAtt": [
+                "Peer2",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
     "ExternalELBTargetGroup": {
       "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
       "DependsOn": [
@@ -1181,6 +1399,114 @@
           "Ref": "Peer2ELB"
         },
         "Port": 9090,
+        "Protocol": "TCP"
+      }
+    },
+    "Peer0RAFTListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "Peer0RAFTTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "Peer0ELB"
+        },
+        "Port": 12379,
+        "Protocol": "TCP"
+      }
+    },
+    "Peer1RAFTListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "Peer1RAFTTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "Peer1ELB"
+        },
+        "Port": 12379,
+        "Protocol": "TCP"
+      }
+    },
+    "Peer2RAFTListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "Peer2RAFTTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "Peer2ELB"
+        },
+        "Port": 12379,
+        "Protocol": "TCP"
+      }
+    },
+    "Peer0SSHListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "Peer0SSHTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "Peer0ELB"
+        },
+        "Port": 22,
+        "Protocol": "TCP"
+      }
+    },
+    "Peer1SSHListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "Peer1SSHTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "Peer1ELB"
+        },
+        "Port": 22,
+        "Protocol": "TCP"
+      }
+    },
+    "Peer2SSHListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "Peer2SSHTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "Peer2ELB"
+        },
+        "Port": 22,
         "Protocol": "TCP"
       }
     },
