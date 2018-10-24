@@ -18,7 +18,7 @@ global:
     - us-west-2
   reporting: true
 tests:
-  cisco-blockchain-master:
+  cisco-blockchain:
     parameter_input: cisco-blockchain-master-inputs.json
     template_file: cisco-blockchain-master.template
     regions:
