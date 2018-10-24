@@ -163,7 +163,7 @@
         "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180405"
       },
       "us-east-1": {
-        "US1604HVM": "ami-0c17b8bc707a9ba1d"
+        "US1604HVM": "ami-0d49cf82169bb4c9f"
       }
     }
   },
@@ -228,6 +228,14 @@
             "IpProtocol": "tcp",
             "FromPort": "12379",
             "ToPort": "12379",
+            "CidrIp": {
+              "Ref": "BlockChainAccessCIDR"
+            }
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "9200",
+            "ToPort": "9200",
             "CidrIp": {
               "Ref": "BlockChainAccessCIDR"
             }
@@ -473,13 +481,16 @@
           },
           "run_install": {
             "files": {
-              "/home/ubuntu/installer/env": {
+              "/cbp/installer/env": {
                 "content": { "Fn::Join" : [ "", [
+                    "INSTALL_TARGET=node\n",
+                    "PEER_NAME=peer0\n",
                     "PEER_HOST=", { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, "\n",
                     "GENESIS_PEERS=",
                       { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
+                    "ELK_ADDRESS=http://elk:9200\n",
                     "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
                     "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
                     ]
@@ -494,8 +505,8 @@
               "01_start_install": {
                 "command": "echo \"start installation\""
               },
-              "02_install_portal": {
-                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock ciscoblockchain/vera_installer:latest /usr/local/bin/vera-install --version"
+              "02_install_node": {
+                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
               },
               "10_end_install": {
                 "command": "echo \"done installation\""
@@ -610,6 +621,9 @@
     },
     "Peer1": {
       "Type": "AWS::EC2::Instance",
+      "DependsOn": [
+        "Peer0"
+      ],
       "Metadata": {
         "AWS::CloudFormation::Init": {
           "configSets": {
@@ -619,13 +633,16 @@
           },
           "run_install": {
             "files": {
-              "/home/ubuntu/installer/env": {
+              "/cbp/installer/env": {
                 "content": { "Fn::Join" : [ "", [
+                    "INSTALL_TARGET=node\n",
+                    "PEER_NAME=peer1\n",
                     "PEER_HOST=", { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, "\n",
                     "GENESIS_PEERS=",
                       { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
+                    "ELK_ADDRESS=http://elk:9200\n",
                     "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
                     "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
                     ]
@@ -640,8 +657,8 @@
               "01_start_install": {
                 "command": "echo \"start installation\""
               },
-              "02_install_portal": {
-                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock ciscoblockchain/vera_installer:latest /usr/local/bin/vera-install --version"
+              "02_install_node": {
+                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
               },
               "03_end_install": {
                 "command": "echo \"done installation\""
@@ -756,6 +773,9 @@
     },
     "Peer2": {
       "Type": "AWS::EC2::Instance",
+      "DependsOn": [
+        "Peer0"
+      ],
       "Metadata": {
         "AWS::CloudFormation::Init": {
           "configSets": {
@@ -765,13 +785,16 @@
           },
           "run_install": {
             "files": {
-              "/home/ubuntu/installer/env": {
+              "/cbp/installer/env": {
                 "content": { "Fn::Join" : [ "", [
+                    "INSTALL_TARGET=node\n",
+                    "PEER_NAME=peer2\n",
                     "PEER_HOST=", { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
                     "GENESIS_PEERS=",
                       { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
+                    "ELK_ADDRESS=http://elk:9200\n",
                     "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
                     "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
                     ]
@@ -786,8 +809,8 @@
               "01_start_install": {
                 "command": "echo \"start installation\""
               },
-              "02_install_portal": {
-                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock ciscoblockchain/vera_installer:latest /usr/local/bin/vera-install --version"
+              "02_install_node": {
+                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
               },
               "03_end_install": {
                 "command": "echo \"done installation\""
