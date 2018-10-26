@@ -73,10 +73,10 @@
           "default": "Quick Start S3 Key Prefix"
         },
         "BlockChainAccessCIDR": {
-          "default": "Allowed External Access CIDR"
+          "default": "Allowed Blockchain Access CIDR"
         },
         "RemoteAccessCIDR": {
-          "default": "Allowed External Access CIDR"
+          "default": "Allowed SSH Access CIDR"
         },
         "VPCCIDR": {
           "default": "VPC CIDR"

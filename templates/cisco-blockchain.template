@@ -163,7 +163,10 @@
         "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180405"
       },
       "us-east-1": {
-        "US1604HVM": "ami-0d49cf82169bb4c9f"
+        "US1604HVM": "ami-0a00b5f97d49418be"
+      },
+      "eu-west-1": {
+        "US1604HVM": "ami-0d04d861bacbf6b52"
       }
     }
   },
@@ -355,6 +358,22 @@
             ]
           },
           "run_install": {
+            "files": {
+              "/cbp/installer/env": {
+                "content": { "Fn::Join" : [ "", [
+                    "INSTALL_TARGET=portal\n",
+                    "SDK_PEER_HOST=", { "Fn::GetAtt": [ "ExternalELB", "DNSName" ] }, "\n",
+                    "ELK_ADDRESS=http://", { "Fn::GetAtt": [ "Peer0",  "PrivateIp" ] }, ":9200\n",
+                    "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
+                    "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
+                    ]
+                  ]
+                },
+                "mode": "000644",
+                "owner": "root",
+                "group": "root"
+              }
+            },
             "commands": {
               "01_start_install": {
                 "command": "echo \"start installation\""
@@ -391,7 +410,10 @@
           }
         ],
         "SubnetId": {
-          "Ref": "PublicSubnet1ID"
+          "Ref": "PrivateSubnet1ID"
+        },
+        "IamInstanceProfile": {
+          "Ref": "PeerInstanceProfile"
         },
         "Tags": [
           {
@@ -490,7 +512,7 @@
                       { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
-                    "ELK_ADDRESS=http://elk:9200\n",
+                    "ELK_ADDRESS=http://elk:9200", "\n",
                     "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
                     "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
                     ]
@@ -642,7 +664,7 @@
                       { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
-                    "ELK_ADDRESS=http://elk:9200\n",
+                    "ELK_ADDRESS=http://", { "Fn::GetAtt": [ "Peer0",  "PrivateIp" ] }, ":9200\n",
                     "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
                     "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
                     ]
@@ -794,7 +816,7 @@
                       { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
-                    "ELK_ADDRESS=http://elk:9200\n",
+                    "ELK_ADDRESS=http://", { "Fn::GetAtt": [ "Peer0",  "PrivateIp" ] }, ":9200\n",
                     "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
                     "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
                     ]
@@ -1001,6 +1023,76 @@
             "Value": "Peer2NLB"
           }
         ]
+      }
+    },
+    "AdminPortalELB": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Subnets": [
+          {
+            "Ref": "PublicSubnet1ID"
+          }
+        ],
+        "Type": "network",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AdminPortalNLB"
+          }
+        ]
+      }
+    },
+    "AdminPortalSSHTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "AdminPortal"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 22,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AdminPortalSSHTargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id": {
+              "Fn::GetAtt": [
+                "AdminPortal",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "AdminPortalSSHListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "AdminPortalSSHTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "AdminPortalELB"
+        },
+        "Port": 22,
+        "Protocol": "TCP"
       }
     },
     "Peer0ELBTargetGroup": {
@@ -1561,12 +1653,6 @@
         ]
       },
       "Description": "Public DNS Name for the AdminPortal Instance"
-    },
-    "AdminPortalPublicIPAddress": {
-      "Value": {
-        "Fn::Sub": "ubuntu@${AdminPortal.PublicIp}"
-      },
-      "Description": "Public IP address for the AdminPortal instance"
     },
     "Peer0PublicDnsName": {
       "Value": {
