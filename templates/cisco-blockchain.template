@@ -171,6 +171,15 @@
     "VPCID": {
       "Description": "ID of the VPC (e.g., vpc-0343606e)",
       "Type": "AWS::EC2::VPC::Id"
+    },
+    "ElasticsearchVersion" : {
+      "Description" : "User defined Elasticsearch Version",
+      "Type" : "String",
+      "Default": "6.3"
+    },
+    "ESInstanceType" : {
+      "Default": "t2.small.elasticsearch",
+      "Type" : "String"
     }
   },
   "Mappings": {
@@ -280,6 +289,14 @@
             }
           },
           {
+            "IpProtocol": "tcp",
+            "FromPort": "443",
+            "ToPort": "443",
+            "CidrIp": {
+              "Ref": "BlockChainAccessCIDR"
+            }
+          },
+          {
             "IpProtocol": "icmp",
             "FromPort": "-1",
             "ToPort": "-1",
@@ -382,6 +399,13 @@
             "Ref" : "PeerInstanceRole"
           }
         ]
+      }
+    },
+    "ESSLR": {
+      "Type": "AWS::IAM::ServiceLinkedRole",
+      "Properties": {
+        "AWSServiceName": "es.amazonaws.com",
+        "Description": "ES SLR"
       }
     },
     "AdminPortal": {
@@ -1298,6 +1322,38 @@
         "Port": 9090,
         "Protocol": "TCP"
       }
+    },
+    "ElasticsearchDomain": {
+      "Type": "AWS::Elasticsearch::Domain",
+      "DependsOn": [
+        "ESSLR",
+        "Peer0"
+      ],
+      "Properties": {
+        "ElasticsearchVersion": { "Ref": "ElasticsearchVersion" },
+        "ElasticsearchClusterConfig": {
+          "InstanceCount": "2",
+          "InstanceType": { "Ref": "ESInstanceType" },
+          "DedicatedMasterEnabled": "true",
+          "ZoneAwarenessEnabled": "true",
+          "DedicatedMasterCount": "3",
+          "DedicatedMasterType": { "Ref": "ESInstanceType" }
+        },
+        "EBSOptions": {
+          "EBSEnabled": true,
+          "VolumeSize": 20,
+          "VolumeType": "gp2"
+        },
+        "VPCOptions" : {
+          "SubnetIds" : [
+            {"Ref" : "PrivateSubnet1ID"},
+            {"Ref" : "PrivateSubnet2ID"}
+          ],
+          "SecurityGroupIds" : [
+            {"Ref" : "BlockChainSecurityGroup"}
+          ]
+        }
+      }
     }
   },
   "Outputs": {
@@ -1430,6 +1486,16 @@
         ]
       },
       "Description": "Peer Instance Role Arn"
+    },
+    "DomainArn": {
+      "Value": {
+        "Fn::GetAtt": ["ElasticsearchDomain", "DomainArn"]
+      }
+    },
+    "DomainEndpoint": {
+      "Value": {
+        "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"]
+      }
     }
   }
 }
