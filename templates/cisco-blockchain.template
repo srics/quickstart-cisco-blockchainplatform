@@ -401,13 +401,6 @@
         ]
       }
     },
-    "ESSLR": {
-      "Type": "AWS::IAM::ServiceLinkedRole",
-      "Properties": {
-        "AWSServiceName": "es.amazonaws.com",
-        "Description": "ES SLR"
-      }
-    },
     "AdminPortal": {
       "Type": "AWS::EC2::Instance",
       "Metadata": {
@@ -1325,24 +1318,29 @@
     },
     "ElasticsearchDomain": {
       "Type": "AWS::Elasticsearch::Domain",
-      "DependsOn": [
-        "ESSLR",
-        "Peer0"
-      ],
       "Properties": {
         "ElasticsearchVersion": { "Ref": "ElasticsearchVersion" },
         "ElasticsearchClusterConfig": {
           "InstanceCount": "2",
           "InstanceType": { "Ref": "ESInstanceType" },
-          "DedicatedMasterEnabled": "true",
-          "ZoneAwarenessEnabled": "true",
-          "DedicatedMasterCount": "3",
-          "DedicatedMasterType": { "Ref": "ESInstanceType" }
+          "DedicatedMasterEnabled": "false",
+          "ZoneAwarenessEnabled": "true"
         },
         "EBSOptions": {
           "EBSEnabled": true,
-          "VolumeSize": 20,
+          "VolumeSize": 10,
           "VolumeType": "gp2"
+        },
+        "AccessPolicies": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": "*"
+            },
+            "Action": "es:*",
+            "Resource": "*"
+          }]
         },
         "VPCOptions" : {
           "SubnetIds" : [
