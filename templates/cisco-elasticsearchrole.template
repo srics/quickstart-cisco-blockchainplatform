@@ -1,0 +1,20 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Elasticsearch Role Template",
+  "Resources": {
+    "ESRole": {
+      "Type": "AWS::IAM::ServiceLinkedRole",
+      "Properties": {
+        "AWSServiceName": "es.amazonaws.com",
+        "Description": "SLR role for cisco blockchain ES cluster"
+      }
+    }
+  },
+  "Outputs": {
+    "SLRId": {
+      "Value": {
+        "Ref": "ESRole"
+      }
+    }
+  }
+}
