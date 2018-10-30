@@ -242,14 +242,6 @@
             }
           },
           {
-            "IpProtocol": "tcp",
-            "FromPort": "9200",
-            "ToPort": "9200",
-            "CidrIp": {
-              "Ref": "BlockChainAccessCIDR"
-            }
-          },
-          {
             "IpProtocol": "icmp",
             "FromPort": "-1",
             "ToPort": "-1",
@@ -354,6 +346,49 @@
         ]
       }
     },
+    "AdminPortalSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enables SSH Access",
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "22",
+            "ToPort": "22",
+            "CidrIp": {
+              "Ref": "RemoteAccessCIDR"
+            }
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "3000",
+            "ToPort": "3000",
+            "CidrIp": {
+              "Ref": "BlockChainAccessCIDR"
+            }
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "8181",
+            "ToPort": "8181",
+            "CidrIp": {
+              "Ref": "BlockChainAccessCIDR"
+            }
+          },
+          {
+            "IpProtocol": "icmp",
+            "FromPort": "-1",
+            "ToPort": "-1",
+            "CidrIp": {
+              "Ref": "RemoteAccessCIDR"
+            }
+          }
+        ]
+      }
+    },
     "AdminPortal": {
       "Type": "AWS::EC2::Instance",
       "Metadata": {
@@ -413,7 +448,7 @@
         },
         "SecurityGroupIds": [
           {
-            "Ref": "BlockChainSecurityGroup"
+            "Ref": "AdminPortalSecurityGroup"
           }
         ],
         "SubnetId": {
@@ -497,6 +532,129 @@
             ]
           }
         }
+      }
+    },
+    "AdminPortalELB": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Subnets": [
+          {
+            "Ref": "PublicSubnet1ID"
+          }
+        ],
+        "Type": "network",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AdminPortalNLB"
+          }
+        ]
+      }
+    },
+    "AdminPortalAPITargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "AdminPortal"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 8181,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AdminPortalAPITargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id": {
+              "Fn::GetAtt": [
+                "AdminPortal",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "AdminPortalUITargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "AdminPortal"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 3000,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AdminPortalAPITargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id": {
+              "Fn::GetAtt": [
+                "AdminPortal",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "AdminPortalAPIListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "AdminPortalAPITargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "AdminPortalELB"
+        },
+        "Port": 8181,
+        "Protocol": "TCP"
+      }
+    },
+    "AdminPortalUIListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "AdminPortalUITargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "AdminPortalELB"
+        },
+        "Port": 3000,
+        "Protocol": "TCP"
       }
     },
     "Peer0": {
@@ -1031,23 +1189,6 @@
           {
             "Key": "Name",
             "Value": "Peer2NLB"
-          }
-        ]
-      }
-    },
-    "AdminPortalELB": {
-      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
-      "Properties": {
-        "Subnets": [
-          {
-            "Ref": "PublicSubnet1ID"
-          }
-        ],
-        "Type": "network",
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "AdminPortalNLB"
           }
         ]
       }
