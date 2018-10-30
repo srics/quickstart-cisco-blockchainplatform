@@ -172,10 +172,7 @@
         "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180405"
       },
       "us-east-1": {
-        "US1604HVM": "ami-0a00b5f97d49418be"
-      },
-      "eu-west-1": {
-        "US1604HVM": "ami-0d04d861bacbf6b52"
+        "US1604HVM": "ami-097d2494ee8258169"
       }
     }
   },
@@ -371,8 +368,9 @@
               "/cbp/installer/env": {
                 "content": { "Fn::Join" : [ "", [
                     "INSTALL_TARGET=portal\n",
+                    "ADMIN_HOST=", { "Fn::GetAtt": [ "AdminPortalELB", "DNSName" ] }, "\n",
                     "SDK_PEER_HOST=", { "Fn::GetAtt": [ "ExternalELB", "DNSName" ] }, "\n",
-                    "ELK_ADDRESS=http://", { "Fn::GetAtt": [ "Peer0",  "PrivateIp" ] }, ":9200\n",
+                    "ELK_ADDRESS=https://", { "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"] }, ":443", "\n",
                     "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
                     "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
                     ]
@@ -388,7 +386,7 @@
                 "command": "echo \"start installation\""
               },
               "02_install_portal": {
-                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock ciscoblockchain/vera_installer:latest /usr/local/bin/vera-install --version"
+                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
               },
               "03_end_install": {
                 "command": "echo \"done installation\""
@@ -503,6 +501,9 @@
     },
     "Peer0": {
       "Type": "AWS::EC2::Instance",
+      "DependsOn": [
+        "ElasticsearchDomain"
+      ],
       "Metadata": {
         "AWS::CloudFormation::Init": {
           "configSets": {
@@ -521,7 +522,7 @@
                       { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
-                    "ELK_ADDRESS=http://elk:9200", "\n",
+                    "ELK_ADDRESS=https://", { "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"] }, ":443", "\n",
                     "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
                     "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
                     ]
@@ -673,7 +674,7 @@
                       { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
-                    "ELK_ADDRESS=http://", { "Fn::GetAtt": [ "Peer0",  "PrivateIp" ] }, ":9200\n",
+                    "ELK_ADDRESS=https://", { "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"] }, ":443", "\n",
                     "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
                     "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
                     ]
@@ -825,7 +826,7 @@
                       { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
                       { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
-                    "ELK_ADDRESS=http://", { "Fn::GetAtt": [ "Peer0",  "PrivateIp" ] }, ":9200\n",
+                    "ELK_ADDRESS=https://", { "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"] }, ":443", "\n",
                     "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
                     "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
                     ]
