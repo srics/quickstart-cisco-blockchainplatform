@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "BlockChain Template",
+  "Description": "BlockChain Node Template",
   "Metadata": {
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [
