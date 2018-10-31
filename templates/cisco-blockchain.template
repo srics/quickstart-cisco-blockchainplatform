@@ -404,7 +404,7 @@
                 "content": { "Fn::Join" : [ "", [
                     "INSTALL_TARGET=portal\n",
                     "ADMIN_HOST=", { "Fn::GetAtt": [ "AdminPortalELB", "DNSName" ] }, "\n",
-                    "SDK_PEER_HOST=", { "Fn::GetAtt": [ "ExternalELB", "DNSName" ] }, "\n",
+                    "SDK_PEER_HOST=", { "Fn::GetAtt": [ "Peer0ELB", "DNSName" ] }, "\n",
                     "ELK_ADDRESS=https://", { "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"] }, ":443", "\n",
                     "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
                     "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
