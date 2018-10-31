@@ -400,6 +400,15 @@
                     }
                 }
             },
+            "ESRoleStack": {
+                "DependsOn": "VPCStack",
+                "Type": "AWS::CloudFormation::Stack",
+                "Properties": {
+                    "TemplateURL": {
+                      "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/cisco-elasticsearchrole.template"
+                    }
+                }
+            },
             "BastionStack": {
                 "DependsOn": "VPCStack",
                 "Type": "AWS::CloudFormation::Stack",
@@ -483,7 +492,10 @@
                 }
             },
             "BlockChainStack": {
-                "DependsOn": "VPCStack",
+                "DependsOn": [
+                  "VPCStack",
+                  "ESRoleStack"
+                ],
                 "Type": "AWS::CloudFormation::Stack",
                 "Properties": {
                     "TemplateURL": {
