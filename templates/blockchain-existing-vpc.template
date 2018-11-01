@@ -26,9 +26,7 @@
           "Parameters": [
             "KeyPairName",
             "BlockChainAccessCIDR",
-            "InstanceType",
-            "DockerHubID",
-            "DockerHubKey"
+            "InstanceType"
           ]
         },
         {
@@ -74,12 +72,6 @@
         },
         "BlockChainAccessCIDR": {
           "default": "Allowed Application Access CIDR"
-        },
-        "DockerHubID": {
-          "default": "DockerHub Account ID"
-        },
-        "DockerHubKey": {
-          "default": "DockerHub Account Key"
         },
         "VPCID": {
           "default": "VPC ID"
@@ -160,14 +152,6 @@
       "Description": "Allowed CIDR block for external application access",
       "Type": "String"
     },
-    "DockerHubID": {
-      "Description": "The name of the dockerhub account ID, which allows you to access the required container images of the product",
-      "Type": "String"
-    },
-    "DockerHubKey": {
-      "Description": "The key or the password of the dockerhub account ID, which allows you to access the required container images of the product",
-      "Type": "String"
-    },
     "VPCID": {
       "Description": "ID of the VPC (e.g., vpc-0343606e)",
       "Type": "AWS::EC2::VPC::Id"
@@ -201,14 +185,14 @@
           }
       }
     },
-    "BlockChainNodeStack": {
+    "BlockchainNodeStack": {
       "DependsOn": [
         "ESRoleStack"
       ],
       "Type": "AWS::CloudFormation::Stack",
       "Properties": {
           "TemplateURL": {
-              "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/cisco-blockchain.template"
+              "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/cisco-blockchain-nodes.template"
           },
           "Parameters": {
               "InstanceType": {
@@ -247,11 +231,63 @@
               "BlockChainAccessCIDR": {
                   "Ref": "BlockChainAccessCIDR"
               },
-              "DockerHubID": {
-                  "Ref": "DockerHubID"
+              "VPCID": {
+                  "Ref": "VPCID"
+              }
+          }
+      }
+    },
+    "BlockchainPortalStack": {
+      "DependsOn": [
+        "BlockchainNodeStack"
+      ],
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+          "TemplateURL": {
+              "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/cisco-blockchain-portal.template"
+          },
+          "Parameters": {
+              "InstanceType": {
+                  "Ref": "InstanceType"
               },
-              "DockerHubKey": {
-                  "Ref": "DockerHubKey"
+              "KeyPairName": {
+                  "Ref": "KeyPairName"
+              },
+              "PublicSubnet1ID": {
+                  "Ref": "PublicSubnet1ID"
+              },
+              "PrivateSubnet1ID": {
+                  "Ref": "PrivateSubnet1ID"
+              },
+              "PeerHostName": {
+                "Fn::GetAtt": [
+                    "BlockchainNodeStack",
+                    "Outputs.Peer0ELB"
+                ]
+              },
+              "S3BucketName": {
+                "Fn::GetAtt": [
+                    "BlockchainNodeStack",
+                    "Outputs.S3BucketPrivate"
+                ]
+              },
+              "ESDomainName": {
+                "Fn::GetAtt": [
+                    "BlockchainNodeStack",
+                    "Outputs.DomainEndpoint"
+                ]
+              },
+              "QSS3BucketName": {
+                  "Ref": "QSS3BucketName"
+              },
+              "QSS3KeyPrefix": {
+                  "Ref": "QSS3KeyPrefix"
+              },
+              "RemoteAccessCIDR": {
+                  "Ref": "RemoteAccessCIDR"
+              },
+              "BlockChainAccessCIDR": {
+                  "Ref": "BlockChainAccessCIDR"
               },
               "VPCID": {
                   "Ref": "VPCID"

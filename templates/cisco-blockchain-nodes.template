@@ -354,317 +354,6 @@
         ]
       }
     },
-    "AdminPortalSecurityGroup": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "GroupDescription": "Enables SSH Access",
-        "VpcId": {
-          "Ref": "VPCID"
-        },
-        "SecurityGroupIngress": [
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "22",
-            "ToPort": "22",
-            "CidrIp": {
-              "Ref": "RemoteAccessCIDR"
-            }
-          },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "3000",
-            "ToPort": "3000",
-            "CidrIp": {
-              "Ref": "BlockChainAccessCIDR"
-            }
-          },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "8181",
-            "ToPort": "8181",
-            "CidrIp": {
-              "Ref": "BlockChainAccessCIDR"
-            }
-          },
-          {
-            "IpProtocol": "icmp",
-            "FromPort": "-1",
-            "ToPort": "-1",
-            "CidrIp": {
-              "Ref": "RemoteAccessCIDR"
-            }
-          }
-        ]
-      }
-    },
-    "AdminPortal": {
-      "Type": "AWS::EC2::Instance",
-      "Metadata": {
-        "AWS::CloudFormation::Init": {
-          "configSets": {
-            "cisco_install": [
-              "run_install"
-            ]
-          },
-          "run_install": {
-            "files": {
-              "/cbp/installer/env": {
-                "content": { "Fn::Join" : [ "", [
-                    "INSTALL_TARGET=portal\n",
-                    "ADMIN_HOST=", { "Fn::GetAtt": [ "AdminPortalELB", "DNSName" ] }, "\n",
-                    "SDK_PEER_HOST=", { "Fn::GetAtt": [ "Peer0ELB", "DNSName" ] }, "\n",
-                    "ELK_ADDRESS=https://", { "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"] }, ":443", "\n",
-                    "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
-                    "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
-                    ]
-                  ]
-                },
-                "mode": "000644",
-                "owner": "root",
-                "group": "root"
-              }
-            },
-            "commands": {
-              "01_start_install": {
-                "command": "echo \"start installation\""
-              },
-              "02_install_portal": {
-                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
-              },
-              "03_end_install": {
-                "command": "echo \"done installation\""
-              }
-            }
-          }
-        }
-      },
-      "Properties": {
-        "KeyName": {
-          "Ref": "KeyPairName"
-        },
-        "ImageId": {
-          "Fn::FindInMap": [
-            "AWSAMIRegionMap",
-            {
-              "Ref": "AWS::Region"
-            },
-            "US1604HVM"
-          ]
-        },
-        "InstanceType": {
-          "Ref": "InstanceType"
-        },
-        "SecurityGroupIds": [
-          {
-            "Ref": "AdminPortalSecurityGroup"
-          }
-        ],
-        "SubnetId": {
-          "Ref": "PrivateSubnet1ID"
-        },
-        "IamInstanceProfile": {
-          "Ref": "PeerInstanceProfile"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "AdminPortal"
-          }
-        ],
-        "UserData": {
-          "Fn::Base64": {
-            "Fn::Join": [
-              "",
-              [
-                "#!/bin/bash -x\n",
-                "function cfn_fail {",
-                "\n",
-                "cfn-signal -e 1 ",
-                "--stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                " --resource AdminPortal",
-                "\nexit 1\n}",
-                "\n",
-                "function cfn_success {",
-                "\n",
-                "cfn-signal -e 0 ",
-                "--stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                " --resource AdminPortal",
-                "\nexit 0\n}",
-                "\n",
-                "echo \"[Cloning: Load QuickStart Common Utils]\"\n",
-                "\n",
-                "#Once Repo is public (Use quickstart-linux-utilities submodue)\n",
-                "git clone -b develop https://github.com/aws-quickstart/quickstart-linux-utilities.git\n",
-                "source /quickstart-linux-utilities/quickstart-cfn-tools.source\n",
-                "\n",
-                "echo \"[Loaded: Load QuickStart Common Utils]\"\n",
-                "\n",
-                "echo \"[Update Operating System]\"\n",
-                "export QSSTACKNAME=${AWS::StackName}",
-                "export QSREGION=${AWS::Region}",
-                "qs_update-os || qs_error\n",
-                "qs_bootstrap_pip\n",
-                "qs_aws-cfn-bootstrap\n",
-                "echo \"[INFO]: Bootstrapping Status = $(qs_status)\"\n",
-                "cfn-init -v ",
-                " --stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --resource AdminPortal",
-                " --configsets cisco_install",
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                "\n",
-                "# Signal the status from cfn-init\n",
-                "[ $(qs_status) == 0 ] && cfn_success || echo cfn_fail",
-                "\n",
-                "\n"
-              ]
-            ]
-          }
-        }
-      }
-    },
-    "AdminPortalELB": {
-      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
-      "Properties": {
-        "Subnets": [
-          {
-            "Ref": "PublicSubnet1ID"
-          }
-        ],
-        "Type": "network",
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "AdminPortalNLB"
-          }
-        ]
-      }
-    },
-    "AdminPortalAPITargetGroup": {
-      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
-      "DependsOn": [
-        "AdminPortal"
-      ],
-      "Properties": {
-        "HealthCheckIntervalSeconds": 30,
-        "HealthCheckPort": 22,
-        "HealthCheckProtocol": "TCP",
-        "HealthyThresholdCount": 3,
-        "Port": 8181,
-        "Protocol": "TCP",
-        "UnhealthyThresholdCount": 3,
-        "VpcId": {
-          "Ref": "VPCID"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "AdminPortalAPITargetGroup"
-          }
-        ],
-        "TargetType": "ip",
-        "Targets": [
-          {
-            "Id": {
-              "Fn::GetAtt": [
-                "AdminPortal",
-                "PrivateIp"
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "AdminPortalUITargetGroup": {
-      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
-      "DependsOn": [
-        "AdminPortal"
-      ],
-      "Properties": {
-        "HealthCheckIntervalSeconds": 30,
-        "HealthCheckPort": 22,
-        "HealthCheckProtocol": "TCP",
-        "HealthyThresholdCount": 3,
-        "Port": 3000,
-        "Protocol": "TCP",
-        "UnhealthyThresholdCount": 3,
-        "VpcId": {
-          "Ref": "VPCID"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "AdminPortalAPITargetGroup"
-          }
-        ],
-        "TargetType": "ip",
-        "Targets": [
-          {
-            "Id": {
-              "Fn::GetAtt": [
-                "AdminPortal",
-                "PrivateIp"
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "AdminPortalAPIListener": {
-      "Type": "AWS::ElasticLoadBalancingV2::Listener",
-      "Properties": {
-        "DefaultActions": [
-          {
-            "Type": "forward",
-            "TargetGroupArn": {
-              "Ref": "AdminPortalAPITargetGroup"
-            }
-          }
-        ],
-        "LoadBalancerArn": {
-          "Ref": "AdminPortalELB"
-        },
-        "Port": 8181,
-        "Protocol": "TCP"
-      }
-    },
-    "AdminPortalUIListener": {
-      "Type": "AWS::ElasticLoadBalancingV2::Listener",
-      "Properties": {
-        "DefaultActions": [
-          {
-            "Type": "forward",
-            "TargetGroupArn": {
-              "Ref": "AdminPortalUITargetGroup"
-            }
-          }
-        ],
-        "LoadBalancerArn": {
-          "Ref": "AdminPortalELB"
-        },
-        "Port": 3000,
-        "Protocol": "TCP"
-      }
-    },
     "Peer0": {
       "Type": "AWS::EC2::Instance",
       "DependsOn": [
@@ -1629,24 +1318,6 @@
     }
   },
   "Outputs": {
-    "AdminPortalPublicDnsName": {
-      "Value": {
-        "Fn::GetAtt": [
-          "AdminPortal",
-          "PublicDnsName"
-        ]
-      },
-      "Description": "Public DNS Name for the AdminPortal Instance"
-    },
-    "Peer0PublicDnsName": {
-      "Value": {
-        "Fn::GetAtt": [
-          "Peer0",
-          "PublicDnsName"
-        ]
-      },
-      "Description": "Public DNS Name for the Peer0 Instance"
-    },
     "Peer0PrivateIPAddress": {
       "Value": {
         "Fn::GetAtt": [
@@ -1656,15 +1327,6 @@
       },
       "Description": "Private IP address for the Peer0 instance"
     },
-    "Peer1PublicDnsName": {
-      "Value": {
-        "Fn::GetAtt": [
-          "Peer1",
-          "PublicDnsName"
-        ]
-      },
-      "Description": "Public DNS Name for the Peer1 Instance"
-    },
     "Peer1PrivateIPAddress": {
       "Value": {
         "Fn::GetAtt": [
@@ -1673,15 +1335,6 @@
         ]
       },
       "Description": "Private IP address for the Peer1 instance"
-    },
-    "Peer2PublicDnsName": {
-      "Value": {
-        "Fn::GetAtt": [
-          "Peer2",
-          "PublicDnsName"
-        ]
-      },
-      "Description": "Public DNS Name for the Peer2 Instance"
     },
     "Peer2PrivateIPAddress": {
       "Value": {
@@ -1765,6 +1418,17 @@
     "DomainEndpoint": {
       "Value": {
         "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"]
+      }
+    },
+    "S3BucketPrivate": {
+      "Value": {
+        "Ref": "S3BucketPrivate"
+      },
+      "Description": "Private S3 bucket for SSL certs",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-S3BucketPrivate"
+        }
       }
     }
   }
