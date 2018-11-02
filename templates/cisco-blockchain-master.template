@@ -134,12 +134,6 @@
                     },
                     "AvailabilityZones": {
                         "default": "Availability Zones"
-                    },
-                    "DockerHubID": {
-                        "default": "DockerHub ID"
-                    },
-                    "DockerHubKey": {
-                        "default": "DockerHub Key"
                     }
                 }
             }
@@ -329,14 +323,6 @@
                 "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
                 "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
                 "Description": "The CIDR IP range that is permitted to access the instances We recommend that you set this value to a trusted IP range.",
-                "Type": "String"
-            },
-            "DockerHubID": {
-                "Description": "The name of the dockerhub account ID, which allows you to access the required container images of the product",
-                "Type": "String"
-            },
-            "DockerHubKey": {
-                "Description": "The key or the password of the dockerhub account ID, which allows you to access the required container images of the product",
                 "Type": "String"
             },
             "VPCCIDR": {
@@ -559,12 +545,6 @@
                         },
                         "BlockChainAccessCIDR": {
                             "Ref": "BlockChainAccessCIDR"
-                        },
-                        "DockerHubID": {
-                            "Ref": "DockerHubID"
-                        },
-                        "DockerHubKey": {
-                            "Ref": "DockerHubKey"
                         },
                         "VPCID": {
                             "Fn::GetAtt": [

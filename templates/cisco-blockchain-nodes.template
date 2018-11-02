@@ -26,9 +26,7 @@
           "Parameters": [
             "KeyPairName",
             "BlockChainAccessCIDR",
-            "InstanceType",
-            "DockerHubID",
-            "DockerHubKey"
+            "InstanceType"
           ]
         },
         {
@@ -74,12 +72,6 @@
         },
         "BlockChainAccessCIDR": {
           "default": "Allowed Application Access CIDR"
-        },
-        "DockerHubID": {
-          "default": "DockerHub Account ID"
-        },
-        "DockerHubKey": {
-          "default": "DockerHub Account Key"
         },
         "VPCID": {
           "default": "VPC ID"
@@ -160,14 +152,6 @@
       "Description": "Allowed CIDR block for external application access",
       "Type": "String"
     },
-    "DockerHubID": {
-      "Description": "The name of the dockerhub account ID, which allows you to access the required container images of the product",
-      "Type": "String"
-    },
-    "DockerHubKey": {
-      "Description": "The key or the password of the dockerhub account ID, which allows you to access the required container images of the product",
-      "Type": "String"
-    },
     "VPCID": {
       "Description": "ID of the VPC (e.g., vpc-0343606e)",
       "Type": "AWS::EC2::VPC::Id"
@@ -187,47 +171,8 @@
       "AMI": {
         "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180405"
       },
-      "ap-northeast-1": {
-        "US1604HVM": "ami-60a4b21c"
-      },
-      "ap-northeast-2": {
-        "US1604HVM": "ami-633d920d"
-      },
-      "ap-south-1": {
-        "US1604HVM": "ami-dba580b4"
-      },
-      "ap-southeast-1": {
-        "US1604HVM": "ami-82c9ecfe"
-      },
-      "ap-southeast-2": {
-        "US1604HVM": "ami-2b12dc49"
-      },
-      "ca-central-1": {
-        "US1604HVM": "ami-9d7afcf9"
-      },
-      "eu-central-1": {
-        "US1604HVM": "ami-cd491726"
-      },
-      "eu-west-1": {
-        "US1604HVM": "ami-74e6b80d"
-      },
-      "eu-west-2": {
-        "US1604HVM": "ami-506e8f37"
-      },
-      "sa-east-1": {
-        "US1604HVM": "ami-5782d43b"
-      },
       "us-east-1": {
-        "US1604HVM": "ami-6dfe5010"
-      },
-      "us-east-2": {
-        "US1604HVM": "ami-e82a1a8d"
-      },
-      "us-west-1": {
-        "US1604HVM": "ami-493f2f29"
-      },
-      "us-west-2": {
-        "US1604HVM": "ami-ca89eeb2"
+        "US1604HVM": "ami-097d2494ee8258169"
       }
     }
   },
@@ -290,6 +235,14 @@
           },
           {
             "IpProtocol": "tcp",
+            "FromPort": "12379",
+            "ToPort": "12379",
+            "CidrIp": {
+              "Ref": "BlockChainAccessCIDR"
+            }
+          },
+          {
+            "IpProtocol": "tcp",
             "FromPort": "443",
             "ToPort": "443",
             "CidrIp": {
@@ -314,7 +267,7 @@
         "BucketEncryption": {
           "ServerSideEncryptionConfiguration": [
             {
-              "ServerSideEncryptionByDefault": 
+              "ServerSideEncryptionByDefault":
               {
                 "SSEAlgorithm": "AES256"
               }
@@ -345,14 +298,14 @@
         "Path": "/"
       }
     },
-    "PeerInstancePolicy" : {
-      "Type" : "AWS::IAM::Policy",
+    "PeerInstancePolicy": {
+      "Type": "AWS::IAM::Policy",
       "DependsOn": [
         "S3BucketPrivate"
       ],
-      "Properties" : {
-        "PolicyName" : "S3Policy",
-        "PolicyDocument" : {
+      "Properties": {
+        "PolicyName": "S3Policy",
+        "PolicyDocument": {
           "Statement": [
             {
               "Effect": "Allow",
@@ -383,9 +336,9 @@
             }
           ]
         },
-        "Roles" : [
+        "Roles": [
           {
-            "Ref" : "PeerInstanceRole"
+            "Ref": "PeerInstanceRole"
           }
         ]
       }
@@ -396,162 +349,16 @@
         "Path": "/",
         "Roles": [
           {
-            "Ref" : "PeerInstanceRole"
+            "Ref": "PeerInstanceRole"
           }
         ]
       }
     },
-    "AdminPortal": {
-      "Type": "AWS::EC2::Instance",
-      "Metadata": {
-        "AWS::CloudFormation::Init": {
-          "configSets": {
-            "cisco_install": [
-              "run_install"
-            ]
-          },
-          "run_install": {
-            "commands": {
-              "01_start_install": {
-                "command": "echo \"start installation\""
-              },
-              "02_update_pkgs": {
-                "command": "sudo apt-get update"
-              },
-              "03_install_pkgs": {
-                "command": "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common"
-              },
-              "04_install_gpg_key": {
-                "command": "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
-              },
-              "05_add_docker_repo": {
-                "command": "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""
-              },
-              "06_update_pkgs": {
-                "command": "sudo apt-get update"
-              },
-              "07_install_docker": {
-                "command": "sudo apt-get install -y docker-ce docker-compose"
-              },
-              "08_docker_user_group": {
-                "command": "sudo usermod -aG docker ubuntu"
-              },
-              "09_docker_service_restart": {
-                "command": "sudo service docker restart"
-              },
-              "10_install_portal": {
-                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock srics/vera-installer:0.1 /usr/local/bin/vera-install --install-portal --user=foo --password=bar"
-              },
-              "11_end_install": {
-                "command": "echo \"done installation\""
-              }
-            }
-          }
-        }
-      },
-      "Properties": {
-        "KeyName": {
-          "Ref": "KeyPairName"
-        },
-        "ImageId": {
-          "Fn::FindInMap": [
-            "AWSAMIRegionMap",
-            {
-              "Ref": "AWS::Region"
-            },
-            "US1604HVM"
-          ]
-        },
-        "InstanceType": {
-          "Ref": "InstanceType"
-        },
-        "SecurityGroupIds": [
-          {
-            "Ref": "BlockChainSecurityGroup"
-          }
-        ],
-        "SubnetId": {
-          "Ref": "PublicSubnet1ID"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "AdminPortal"
-          }
-        ],
-        "UserData": {
-          "Fn::Base64": {
-            "Fn::Join": [
-              "",
-              [
-                "#!/bin/bash -x\n",
-                "function cfn_fail {",
-                "\n",
-                "cfn-signal -e 1 ",
-                "--stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                " --resource AdminPortal",
-                "\nexit 1\n}",
-                "\n",
-                "function cfn_success {",
-                "\n",
-                "cfn-signal -e 0 ",
-                "--stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                " --resource AdminPortal",
-                "\nexit 0\n}",
-                "\n",
-                "echo \"[Cloning: Load QuickStart Common Utils]\"\n",
-                "\n",
-                "#Once Repo is public (Use quickstart-linux-utilities submodue)\n",
-                "git clone -b develop https://github.com/aws-quickstart/quickstart-linux-utilities.git\n",
-                "source /quickstart-linux-utilities/quickstart-cfn-tools.source\n",
-                "\n",
-                "echo \"[Loaded: Load QuickStart Common Utils]\"\n",
-                "\n",
-                "echo \"[Update Operating System]\"\n",
-                "export QSSTACKNAME=${AWS::StackName}",
-                "export QSREGION=${AWS::Region}",
-                "qs_update-os || qs_error\n",
-                "qs_bootstrap_pip\n",
-                "qs_aws-cfn-bootstrap\n",
-                "echo \"[INFO]: Bootstrapping Status = $(qs_status)\"\n",
-                "cfn-init -v ",
-                " --stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --resource AdminPortal",
-                " --configsets cisco_install",
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                "\n",
-                "# Signal the status from cfn-init\n",
-                "[ $(qs_status) == 0 ] && cfn_success || echo cfn_fail",
-                "\n",
-                "\n"
-              ]
-            ]
-          }
-        }
-      }
-    },
     "Peer0": {
       "Type": "AWS::EC2::Instance",
+      "DependsOn": [
+        "ElasticsearchDomain"
+      ],
       "Metadata": {
         "AWS::CloudFormation::Init": {
           "configSets": {
@@ -560,38 +367,35 @@
             ]
           },
           "run_install": {
+            "files": {
+              "/cbp/installer/env": {
+                "content": { "Fn::Join" : [ "", [
+                    "INSTALL_TARGET=node\n",
+                    "PEER_NAME=peer0\n",
+                    "PEER_HOST=", { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, "\n",
+                    "GENESIS_PEERS=",
+                      { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
+                      { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
+                      { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
+                    "ELK_ADDRESS=https://", { "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"] }, ":443", "\n",
+                    "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
+                    "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
+                    ]
+                  ]
+                },
+                "mode": "000644",
+                "owner": "root",
+                "group": "root"
+              }
+            },
             "commands": {
               "01_start_install": {
                 "command": "echo \"start installation\""
               },
-              "02_update_pkgs": {
-                "command": "sudo apt-get update"
+              "02_install_node": {
+                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
               },
-              "03_install_pkgs": {
-                "command": "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common"
-              },
-              "04_install_gpg_key": {
-                "command": "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
-              },
-              "05_add_docker_repo": {
-                "command": "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""
-              },
-              "06_update_pkgs": {
-                "command": "sudo apt-get update"
-              },
-              "07_install_docker": {
-                "command": "sudo apt-get install -y docker-ce docker-compose"
-              },
-              "08_docker_user_group": {
-                "command": "sudo usermod -aG docker ubuntu"
-              },
-              "09_docker_service_restart": {
-                "command": "sudo service docker restart"
-              },
-              "10_install_peer": {
-                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock srics/vera-installer:0.1 /usr/local/bin/vera-install --install-node=peer0 --user=foo --password=bar"
-              },
-              "11_end_install": {
+              "10_end_install": {
                 "command": "echo \"done installation\""
               }
             }
@@ -704,6 +508,9 @@
     },
     "Peer1": {
       "Type": "AWS::EC2::Instance",
+      "DependsOn": [
+        "Peer0"
+      ],
       "Metadata": {
         "AWS::CloudFormation::Init": {
           "configSets": {
@@ -712,38 +519,35 @@
             ]
           },
           "run_install": {
+            "files": {
+              "/cbp/installer/env": {
+                "content": { "Fn::Join" : [ "", [
+                    "INSTALL_TARGET=node\n",
+                    "PEER_NAME=peer1\n",
+                    "PEER_HOST=", { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, "\n",
+                    "GENESIS_PEERS=",
+                      { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
+                      { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
+                      { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
+                    "ELK_ADDRESS=https://", { "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"] }, ":443", "\n",
+                    "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
+                    "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
+                    ]
+                  ]
+                },
+                "mode": "000644",
+                "owner": "root",
+                "group": "root"
+              }
+            },
             "commands": {
               "01_start_install": {
                 "command": "echo \"start installation\""
               },
-              "02_update_pkgs": {
-                "command": "sudo apt-get update"
+              "02_install_node": {
+                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
               },
-              "03_install_pkgs": {
-                "command": "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common"
-              },
-              "04_install_gpg_key": {
-                "command": "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
-              },
-              "05_add_docker_repo": {
-                "command": "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""
-              },
-              "06_update_pkgs": {
-                "command": "sudo apt-get update"
-              },
-              "07_install_docker": {
-                "command": "sudo apt-get install -y docker-ce docker-compose"
-              },
-              "08_docker_user_group": {
-                "command": "sudo usermod -aG docker ubuntu"
-              },
-              "09_docker_service_restart": {
-                "command": "sudo service docker restart"
-              },
-              "10_install_peer": {
-                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock srics/vera-installer:0.1 /usr/local/bin/vera-install --install-node=peer1 --user=foo --password=bar"
-              },
-              "11_end_install": {
+              "03_end_install": {
                 "command": "echo \"done installation\""
               }
             }
@@ -856,6 +660,9 @@
     },
     "Peer2": {
       "Type": "AWS::EC2::Instance",
+      "DependsOn": [
+        "Peer0"
+      ],
       "Metadata": {
         "AWS::CloudFormation::Init": {
           "configSets": {
@@ -864,38 +671,35 @@
             ]
           },
           "run_install": {
+            "files": {
+              "/cbp/installer/env": {
+                "content": { "Fn::Join" : [ "", [
+                    "INSTALL_TARGET=node\n",
+                    "PEER_NAME=peer2\n",
+                    "PEER_HOST=", { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
+                    "GENESIS_PEERS=",
+                      { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
+                      { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
+                      { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
+                    "ELK_ADDRESS=https://", { "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"] }, ":443", "\n",
+                    "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
+                    "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
+                    ]
+                  ]
+                },
+                "mode": "000644",
+                "owner": "root",
+                "group": "root"
+              }
+            },
             "commands": {
               "01_start_install": {
                 "command": "echo \"start installation\""
               },
-              "02_update_pkgs": {
-                "command": "sudo apt-get update"
+              "02_install_node": {
+                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
               },
-              "03_install_pkgs": {
-                "command": "sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common"
-              },
-              "04_install_gpg_key": {
-                "command": "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -"
-              },
-              "05_add_docker_repo": {
-                "command": "sudo add-apt-repository \"deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\""
-              },
-              "06_update_pkgs": {
-                "command": "sudo apt-get update"
-              },
-              "07_install_docker": {
-                "command": "sudo apt-get install -y docker-ce docker-compose"
-              },
-              "08_docker_user_group": {
-                "command": "sudo usermod -aG docker ubuntu"
-              },
-              "09_docker_service_restart": {
-                "command": "sudo service docker restart"
-              },
-              "10_install_peer": {
-                "command": "docker run --rm -i --volume /var/run/docker.sock:/var/run/docker.sock srics/vera-installer:0.1 /usr/local/bin/vera-install --install-peer=peer2 --user=foo --password=bar"
-              },
-              "11_end_install": {
+              "03_end_install": {
                 "command": "echo \"done installation\""
               }
             }
@@ -1018,7 +822,7 @@
           },
           {
             "Ref": "PublicSubnet3ID"
-          } 
+          }
         ],
         "Type": "network",
         "LoadBalancerAttributes": [
@@ -1075,7 +879,7 @@
         "Subnets": [
           {
             "Ref": "PublicSubnet3ID"
-          } 
+          }
         ],
         "Type": "network",
         "Tags": [
@@ -1111,7 +915,7 @@
         "TargetType": "ip",
         "Targets": [
           {
-            "Id" : {
+            "Id": {
               "Fn::GetAtt": [
                 "Peer0",
                 "PrivateIp"
@@ -1146,7 +950,7 @@
         "TargetType": "ip",
         "Targets": [
           {
-            "Id" : {
+            "Id": {
               "Fn::GetAtt": [
                 "Peer1",
                 "PrivateIp"
@@ -1181,7 +985,112 @@
         "TargetType": "ip",
         "Targets": [
           {
-            "Id" : {
+            "Id": {
+              "Fn::GetAtt": [
+                "Peer2",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Peer0RAFTTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "Peer0"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 12379,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer0RAFTTargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id": {
+              "Fn::GetAtt": [
+                "Peer0",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Peer1RAFTTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "Peer1"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 12379,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer1RAFTTargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id": {
+              "Fn::GetAtt": [
+                "Peer1",
+                "PrivateIp"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Peer2RAFTTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "DependsOn": [
+        "Peer2"
+      ],
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPort": 22,
+        "HealthCheckProtocol": "TCP",
+        "HealthyThresholdCount": 3,
+        "Port": 12379,
+        "Protocol": "TCP",
+        "UnhealthyThresholdCount": 3,
+        "VpcId": {
+          "Ref": "VPCID"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "Peer2RAFTTargetGroup"
+          }
+        ],
+        "TargetType": "ip",
+        "Targets": [
+          {
+            "Id": {
               "Fn::GetAtt": [
                 "Peer2",
                 "PrivateIp"
@@ -1218,7 +1127,7 @@
         "TargetType": "ip",
         "Targets": [
           {
-            "Id" : {
+            "Id": {
               "Fn::GetAtt": [
                 "Peer0",
                 "PrivateIp"
@@ -1226,7 +1135,7 @@
             }
           },
           {
-            "Id" : {
+            "Id": {
               "Fn::GetAtt": [
                 "Peer1",
                 "PrivateIp"
@@ -1234,7 +1143,7 @@
             }
           },
           {
-            "Id" : {
+            "Id": {
               "Fn::GetAtt": [
                 "Peer2",
                 "PrivateIp"
@@ -1298,6 +1207,60 @@
         "Protocol": "TCP"
       }
     },
+    "Peer0RAFTListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "Peer0RAFTTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "Peer0ELB"
+        },
+        "Port": 12379,
+        "Protocol": "TCP"
+      }
+    },
+    "Peer1RAFTListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "Peer1RAFTTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "Peer1ELB"
+        },
+        "Port": 12379,
+        "Protocol": "TCP"
+      }
+    },
+    "Peer2RAFTListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "Peer2RAFTTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "Peer2ELB"
+        },
+        "Port": 12379,
+        "Protocol": "TCP"
+      }
+    },
     "ExternalELBListener": {
       "Type": "AWS::ElasticLoadBalancingV2::Listener",
       "Properties": {
@@ -1355,30 +1318,6 @@
     }
   },
   "Outputs": {
-    "AdminPortalPublicDnsName": {
-      "Value": {
-        "Fn::GetAtt": [
-          "AdminPortal",
-          "PublicDnsName"
-        ]
-      },
-      "Description": "Public DNS Name for the AdminPortal Instance"
-    },
-    "AdminPortalPublicIPAddress": {
-      "Value": {
-        "Fn::Sub": "ubuntu@${AdminPortal.PublicIp}"
-      },
-      "Description": "Public IP address for the AdminPortal instance"
-    },
-    "Peer0PublicDnsName": {
-      "Value": {
-        "Fn::GetAtt": [
-          "Peer0",
-          "PublicDnsName"
-        ]
-      },
-      "Description": "Public DNS Name for the Peer0 Instance"
-    },
     "Peer0PrivateIPAddress": {
       "Value": {
         "Fn::GetAtt": [
@@ -1388,15 +1327,6 @@
       },
       "Description": "Private IP address for the Peer0 instance"
     },
-    "Peer1PublicDnsName": {
-      "Value": {
-        "Fn::GetAtt": [
-          "Peer1",
-          "PublicDnsName"
-        ]
-      },
-      "Description": "Public DNS Name for the Peer1 Instance"
-    },
     "Peer1PrivateIPAddress": {
       "Value": {
         "Fn::GetAtt": [
@@ -1405,15 +1335,6 @@
         ]
       },
       "Description": "Private IP address for the Peer1 instance"
-    },
-    "Peer2PublicDnsName": {
-      "Value": {
-        "Fn::GetAtt": [
-          "Peer2",
-          "PublicDnsName"
-        ]
-      },
-      "Description": "Public DNS Name for the Peer2 Instance"
     },
     "Peer2PrivateIPAddress": {
       "Value": {
@@ -1427,7 +1348,8 @@
     "ExternalELB": {
       "Value": {
         "Fn::GetAtt": [
-          "ExternalELB" , "DNSName"
+          "ExternalELB",
+          "DNSName"
         ]
       },
       "Description": "External Network Load Balancer Name",
@@ -1440,7 +1362,8 @@
     "Peer0ELB": {
       "Value": {
         "Fn::GetAtt": [
-          "Peer0ELB" , "DNSName"
+          "Peer0ELB",
+          "DNSName"
         ]
       },
       "Description": "Peer0 Network Load Balancer Name",
@@ -1453,7 +1376,8 @@
     "Peer1ELB": {
       "Value": {
         "Fn::GetAtt": [
-          "Peer1ELB" , "DNSName"
+          "Peer1ELB",
+          "DNSName"
         ]
       },
       "Description": "Peer1 Network Load Balancer Name",
@@ -1466,7 +1390,8 @@
     "Peer2ELB": {
       "Value": {
         "Fn::GetAtt": [
-          "Peer2ELB" , "DNSName"
+          "Peer2ELB",
+          "DNSName"
         ]
       },
       "Description": "Peer2 Network Load Balancer Name",
@@ -1493,6 +1418,17 @@
     "DomainEndpoint": {
       "Value": {
         "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"]
+      }
+    },
+    "S3BucketPrivate": {
+      "Value": {
+        "Ref": "S3BucketPrivate"
+      },
+      "Description": "Private S3 bucket for SSL certs",
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-S3BucketPrivate"
+        }
       }
     }
   }
