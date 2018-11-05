@@ -1,1435 +1,1584 @@
 {
-  "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "BlockChain Node Template",
-  "Metadata": {
-    "AWS::CloudFormation::Interface": {
-      "ParameterGroups": [
-        {
-          "Label": {
-            "default": "Network Configuration"
-          },
-          "Parameters": [
-            "VPCID",
-            "PublicSubnet1ID",
-            "PublicSubnet2ID",
-            "PublicSubnet3ID",
-            "PrivateSubnet1ID",
-            "PrivateSubnet2ID",
-            "PrivateSubnet3ID",
-            "RemoteAccessCIDR"
-          ]
-        },
-        {
-          "Label": {
-            "default": "BlockChain EC2 Configuration"
-          },
-          "Parameters": [
-            "KeyPairName",
-            "BlockChainAccessCIDR",
-            "InstanceType"
-          ]
-        },
-        {
-          "Label": {
-            "default": "AWS Quick Start Configuration"
-          },
-          "Parameters": [
-            "QSS3BucketName",
-            "QSS3KeyPrefix"
-          ]
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "BlockChain Node Template",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Network Configuration"
+                    },
+                    "Parameters": [
+                        "VPCID",
+                        "PublicSubnet1ID",
+                        "PublicSubnet2ID",
+                        "PublicSubnet3ID",
+                        "PrivateSubnet1ID",
+                        "PrivateSubnet2ID",
+                        "PrivateSubnet3ID",
+                        "RemoteAccessCIDR"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "BlockChain EC2 Configuration"
+                    },
+                    "Parameters": [
+                        "KeyPairName",
+                        "BlockChainAccessCIDR",
+                        "InstanceType"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "AWS Quick Start Configuration"
+                    },
+                    "Parameters": [
+                        "QSS3BucketName",
+                        "QSS3KeyPrefix"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "KeyPairName": {
+                    "default": "Key Pair Name"
+                },
+                "PublicSubnet1ID": {
+                    "default": "Public Subnet 1 ID"
+                },
+                "PublicSubnet2ID": {
+                    "default": "Public Subnet 2 ID"
+                },
+                "PublicSubnet3ID": {
+                    "default": "Public Subnet 3 ID"
+                },
+                "PrivateSubnet1ID": {
+                    "default": "Private Subnet 1 ID"
+                },
+                "PrivateSubnet2ID": {
+                    "default": "Private Subnet 2 ID"
+                },
+                "PrivateSubnet3ID": {
+                    "default": "Private Subnet 3 ID"
+                },
+                "QSS3BucketName": {
+                    "default": "Quick Start S3 Bucket Name"
+                },
+                "QSS3KeyPrefix": {
+                    "default": "Quick Start S3 Key Prefix"
+                },
+                "RemoteAccessCIDR": {
+                    "default": "Allowed SSH Access CIDR"
+                },
+                "BlockChainAccessCIDR": {
+                    "default": "Allowed Application Access CIDR"
+                },
+                "VPCID": {
+                    "default": "VPC ID"
+                }
+            }
         }
-      ],
-      "ParameterLabels": {
+    },
+    "Parameters": {
+        "InstanceType": {
+            "AllowedValues": [
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "t2.large",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge"
+            ],
+            "Default": "t2.micro",
+            "Description": "Amazon EC2 instance type for the bastion instances",
+            "Type": "String"
+        },
         "KeyPairName": {
-          "default": "Key Pair Name"
+            "Description": "Enter a Public/private key pair. If you do not have one in this region, please create it before continuing",
+            "Type": "AWS::EC2::KeyPair::KeyName"
         },
         "PublicSubnet1ID": {
-          "default": "Public Subnet 1 ID"
+            "Description": "ID of the public subnet 1 that you want to provision the first bastion into (e.g., subnet-a0246dcd)",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "PublicSubnet2ID": {
-          "default": "Public Subnet 2 ID"
+            "Description": "ID of the public subnet 2 you want to provision the second bastion into (e.g., subnet-e3246d8e)",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "PublicSubnet3ID": {
-          "default": "Public Subnet 3 ID"
+            "Description": "ID of the public subnet 3 you want to provision the second bastion into (e.g., subnet-b1f4a2cd)",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "PrivateSubnet1ID": {
-          "default": "Private Subnet 1 ID"
+            "Description": "ID of the private subnet 1 in Availability Zone 1 (e.g., subnet-a0246dcd)",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "PrivateSubnet2ID": {
-          "default": "Private Subnet 2 ID"
+            "Description": "ID of the private subnet 2 in Availability Zone 2 (e.g., subnet-e3246d8e)",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "PrivateSubnet3ID": {
-          "default": "Private Subnet 3 ID"
+            "Description": "ID of the private subnet 3 in Availability Zone 3 (e.g., subnet-b1f4a2cd)",
+            "Type": "AWS::EC2::Subnet::Id"
         },
         "QSS3BucketName": {
-          "default": "Quick Start S3 Bucket Name"
+            "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
+            "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Default": "aws-quickstart",
+            "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
+            "Type": "String"
         },
         "QSS3KeyPrefix": {
-          "default": "Quick Start S3 Key Prefix"
+            "AllowedPattern": "^[0-9a-zA-Z-/]*$",
+            "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
+            "Default": "quickstart-cisco-blockchainplatform/",
+            "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
+            "Type": "String"
         },
         "RemoteAccessCIDR": {
-          "default": "Allowed SSH Access CIDR"
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+            "Description": "Allowed CIDR block for external SSH access",
+            "Type": "String"
         },
         "BlockChainAccessCIDR": {
-          "default": "Allowed Application Access CIDR"
+            "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
+            "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
+            "Description": "Allowed CIDR block for external application access",
+            "Type": "String"
         },
         "VPCID": {
-          "default": "VPC ID"
-        }
-      }
-    }
-  },
-  "Parameters": {
-    "InstanceType": {
-      "AllowedValues": [
-        "t2.micro",
-        "t2.small",
-        "t2.medium",
-        "t2.large",
-        "m3.large",
-        "m3.xlarge",
-        "m3.2xlarge",
-        "m4.large",
-        "m4.xlarge",
-        "m4.2xlarge",
-        "m4.4xlarge"
-      ],
-      "Default": "t2.micro",
-      "Description": "Amazon EC2 instance type for the bastion instances",
-      "Type": "String"
-    },
-    "KeyPairName": {
-      "Description": "Enter a Public/private key pair. If you do not have one in this region, please create it before continuing",
-      "Type": "AWS::EC2::KeyPair::KeyName"
-    },
-    "PublicSubnet1ID": {
-      "Description": "ID of the public subnet 1 that you want to provision the first bastion into (e.g., subnet-a0246dcd)",
-      "Type": "AWS::EC2::Subnet::Id"
-    },
-    "PublicSubnet2ID": {
-      "Description": "ID of the public subnet 2 you want to provision the second bastion into (e.g., subnet-e3246d8e)",
-      "Type": "AWS::EC2::Subnet::Id"
-    },
-    "PublicSubnet3ID": {
-      "Description": "ID of the public subnet 3 you want to provision the second bastion into (e.g., subnet-b1f4a2cd)",
-      "Type": "AWS::EC2::Subnet::Id"
-    },
-    "PrivateSubnet1ID": {
-      "Description": "ID of the private subnet 1 in Availability Zone 1 (e.g., subnet-a0246dcd)",
-      "Type": "AWS::EC2::Subnet::Id"
-    },
-    "PrivateSubnet2ID": {
-      "Description": "ID of the private subnet 2 in Availability Zone 2 (e.g., subnet-e3246d8e)",
-      "Type": "AWS::EC2::Subnet::Id"
-    },
-    "PrivateSubnet3ID": {
-      "Description": "ID of the private subnet 3 in Availability Zone 3 (e.g., subnet-b1f4a2cd)",
-      "Type": "AWS::EC2::Subnet::Id"
-    },
-    "QSS3BucketName": {
-      "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
-      "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
-      "Default": "aws-quickstart",
-      "Description": "S3 bucket name for the Quick Start assets. Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
-      "Type": "String"
-    },
-    "QSS3KeyPrefix": {
-      "AllowedPattern": "^[0-9a-zA-Z-/]*$",
-      "ConstraintDescription": "Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
-      "Default": "quickstart-cisco-blockchainplatform/",
-      "Description": "S3 key prefix for the Quick Start assets. Quick Start key prefix can include numbers, lowercase letters, uppercase letters, hyphens (-), and forward slash (/).",
-      "Type": "String"
-    },
-    "RemoteAccessCIDR": {
-      "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-      "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-      "Description": "Allowed CIDR block for external SSH access",
-      "Type": "String"
-    },
-    "BlockChainAccessCIDR": {
-      "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
-      "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-      "Description": "Allowed CIDR block for external application access",
-      "Type": "String"
-    },
-    "VPCID": {
-      "Description": "ID of the VPC (e.g., vpc-0343606e)",
-      "Type": "AWS::EC2::VPC::Id"
-    },
-    "ElasticsearchVersion" : {
-      "Description" : "User defined Elasticsearch Version",
-      "Type" : "String",
-      "Default": "6.3"
-    },
-    "ESInstanceType" : {
-      "Default": "t2.small.elasticsearch",
-      "Type" : "String"
-    }
-  },
-  "Mappings": {
-    "AWSAMIRegionMap": {
-      "AMI": {
-        "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20180405"
-      },
-      "us-east-1": {
-        "US1604HVM": "ami-097d2494ee8258169"
-      }
-    }
-  },
-  "Rules": {
-    "SubnetsInVPC": {
-      "Assertions": [
-        {
-          "Assert": {
-            "Fn::EachMemberIn": [
-              {
-                "Fn::ValueOfAll": [
-                  "AWS::EC2::Subnet::Id",
-                  "VpcId"
-                ]
-              },
-              {
-                "Fn::RefAll": "AWS::EC2::VPC::Id"
-              }
-            ]
-          },
-          "AssertDescription": "All subnets must exist in the VPC"
-        }
-      ]
-    }
-  },
-  "Conditions": {
-    "GovCloudCondition": {
-      "Fn::Equals": [
-        {
-          "Ref": "AWS::Region"
+            "Description": "ID of the VPC (e.g., vpc-0343606e)",
+            "Type": "AWS::EC2::VPC::Id"
         },
-        "us-gov-west-1"
-      ]
-    }
-  },
-  "Resources": {
-    "BlockChainSecurityGroup": {
-      "Type": "AWS::EC2::SecurityGroup",
-      "Properties": {
-        "GroupDescription": "Enables SSH Access",
-        "VpcId": {
-          "Ref": "VPCID"
+        "ElasticsearchVersion": {
+            "Description": "User defined Elasticsearch Version",
+            "Type": "String",
+            "Default": "6.3"
         },
-        "SecurityGroupIngress": [
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "22",
-            "ToPort": "22",
-            "CidrIp": {
-              "Ref": "RemoteAccessCIDR"
-            }
-          },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "9090",
-            "ToPort": "9090",
-            "CidrIp": {
-              "Ref": "BlockChainAccessCIDR"
-            }
-          },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "12379",
-            "ToPort": "12379",
-            "CidrIp": {
-              "Ref": "BlockChainAccessCIDR"
-            }
-          },
-          {
-            "IpProtocol": "tcp",
-            "FromPort": "443",
-            "ToPort": "443",
-            "CidrIp": {
-              "Ref": "BlockChainAccessCIDR"
-            }
-          },
-          {
-            "IpProtocol": "icmp",
-            "FromPort": "-1",
-            "ToPort": "-1",
-            "CidrIp": {
-              "Ref": "RemoteAccessCIDR"
-            }
-          }
-        ]
-      }
-    },
-    "S3BucketPrivate" : {
-      "Type" : "AWS::S3::Bucket",
-      "Properties" : {
-        "AccessControl" : "Private",
-        "BucketEncryption": {
-          "ServerSideEncryptionConfiguration": [
-            {
-              "ServerSideEncryptionByDefault":
-              {
-                "SSEAlgorithm": "AES256"
-              }
-            }
-          ]
+        "ESInstanceType": {
+            "Default": "t2.small.elasticsearch",
+            "Type": "String"
         }
-      }
     },
-    "PeerInstanceRole": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Principal": {
-                "Service": [
-                  "ec2.amazonaws.com"
-                ]
-              },
-              "Action": [
-                "sts:AssumeRole"
-              ]
+    "Mappings": {
+        "AWSAMIRegionMap": {
+            "AMI": {
+                "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20181012"
+            },
+            "us-east-1": {
+                "US1604HVM": "ami-0735ea082a1534cac"
             }
-          ]
-        },
-        "Path": "/"
-      }
+        }
     },
-    "PeerInstancePolicy": {
-      "Type": "AWS::IAM::Policy",
-      "DependsOn": [
-        "S3BucketPrivate"
-      ],
-      "Properties": {
-        "PolicyName": "S3Policy",
-        "PolicyDocument": {
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Action": [
-                "s3:ListBucket"
-              ],
-              "Resource": [
+    "Rules": {
+        "SubnetsInVPC": {
+            "Assertions": [
                 {
-                  "Fn::GetAtt": [
-                    "S3BucketPrivate",
+                    "Assert": {
+                        "Fn::EachMemberIn": [
+                            {
+                                "Fn::ValueOfAll": [
+                                    "AWS::EC2::Subnet::Id",
+                                    "VpcId"
+                                ]
+                            },
+                            {
+                                "Fn::RefAll": "AWS::EC2::VPC::Id"
+                            }
+                        ]
+                    },
+                    "AssertDescription": "All subnets must exist in the VPC"
+                }
+            ]
+        }
+    },
+    "Conditions": {
+        "GovCloudCondition": {
+            "Fn::Equals": [
+                {
+                    "Ref": "AWS::Region"
+                },
+                "us-gov-west-1"
+            ]
+        }
+    },
+    "Resources": {
+        "BlockChainSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enables SSH Access",
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "9090",
+                        "ToPort": "9090",
+                        "CidrIp": {
+                            "Ref": "BlockChainAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "12379",
+                        "ToPort": "12379",
+                        "CidrIp": {
+                            "Ref": "BlockChainAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "443",
+                        "ToPort": "443",
+                        "CidrIp": {
+                            "Ref": "BlockChainAccessCIDR"
+                        }
+                    },
+                    {
+                        "IpProtocol": "icmp",
+                        "FromPort": "-1",
+                        "ToPort": "-1",
+                        "CidrIp": {
+                            "Ref": "RemoteAccessCIDR"
+                        }
+                    }
+                ]
+            }
+        },
+        "S3BucketPrivate": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "AccessControl": "Private",
+                "BucketEncryption": {
+                    "ServerSideEncryptionConfiguration": [
+                        {
+                            "ServerSideEncryptionByDefault": {
+                                "SSEAlgorithm": "AES256"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "PeerInstanceRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/"
+            }
+        },
+        "PeerInstancePolicy": {
+            "Type": "AWS::IAM::Policy",
+            "DependsOn": [
+                "S3BucketPrivate"
+            ],
+            "Properties": {
+                "PolicyName": "S3Policy",
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:ListBucket"
+                            ],
+                            "Resource": [
+                                {
+                                    "Fn::GetAtt": [
+                                        "S3BucketPrivate",
+                                        "Arn"
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:PutObject",
+                                "s3:GetObject",
+                                "s3:DeleteObject"
+                            ],
+                            "Resource": [
+                                {
+                                    "Fn::Sub": "${S3BucketPrivate.Arn}/*"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "Roles": [
+                    {
+                        "Ref": "PeerInstanceRole"
+                    }
+                ]
+            }
+        },
+        "PeerInstanceProfile": {
+            "Type": "AWS::IAM::InstanceProfile",
+            "Properties": {
+                "Path": "/",
+                "Roles": [
+                    {
+                        "Ref": "PeerInstanceRole"
+                    }
+                ]
+            }
+        },
+        "Peer0": {
+            "Type": "AWS::EC2::Instance",
+            "DependsOn": [
+                "ElasticsearchDomain"
+            ],
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "configSets": {
+                        "cisco_install": [
+                            "run_install"
+                        ]
+                    },
+                    "run_install": {
+                        "files": {
+                            "/cbp/installer/env": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "INSTALL_TARGET=node\n",
+                                            "PEER_NAME=peer0\n",
+                                            "PEER_HOST=",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "Peer0ELB",
+                                                    "DNSName"
+                                                ]
+                                            },
+                                            "\n",
+                                            "GENESIS_PEERS=",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "Peer0ELB",
+                                                    "DNSName"
+                                                ]
+                                            },
+                                            ",",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "Peer1ELB",
+                                                    "DNSName"
+                                                ]
+                                            },
+                                            ",",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "Peer2ELB",
+                                                    "DNSName"
+                                                ]
+                                            },
+                                            "\n",
+                                            "ELK_ADDRESS=https://",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "ElasticsearchDomain",
+                                                    "DomainEndpoint"
+                                                ]
+                                            },
+                                            ":443",
+                                            "\n",
+                                            "BUCKET=",
+                                            {
+                                                "Ref": "S3BucketPrivate"
+                                            },
+                                            "\n",
+                                            "AWS_REGION=",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            "\n"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000644",
+                                "owner": "root",
+                                "group": "root"
+                            }
+                        },
+                        "commands": {
+                            "01_start_install": {
+                                "command": "echo \"start installation\""
+                            },
+                            "02_install_node": {
+                                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
+                            },
+                            "10_end_install": {
+                                "command": "echo \"done installation\""
+                            }
+                        }
+                    }
+                }
+            },
+            "Properties": {
+                "KeyName": {
+                    "Ref": "KeyPairName"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "US1604HVM"
+                    ]
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Ref": "BlockChainSecurityGroup"
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet1ID"
+                },
+                "IamInstanceProfile": {
+                    "Ref": "PeerInstanceProfile"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Peer0"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash -x\n",
+                                "function cfn_fail {",
+                                "\n",
+                                "cfn-signal -e 1 ",
+                                "--stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                " --resource Peer0",
+                                "\nexit 1\n}",
+                                "\n",
+                                "function cfn_success {",
+                                "\n",
+                                "cfn-signal -e 0 ",
+                                "--stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                " --resource Peer0",
+                                "\nexit 0\n}",
+                                "\n",
+                                "echo \"[Cloning: Load QuickStart Common Utils]\"\n",
+                                "\n",
+                                "#Once Repo is public (Use quickstart-linux-utilities submodue)\n",
+                                "git clone -b develop https://github.com/aws-quickstart/quickstart-linux-utilities.git\n",
+                                "source /quickstart-linux-utilities/quickstart-cfn-tools.source\n",
+                                "\n",
+                                "echo \"[Loaded: Load QuickStart Common Utils]\"\n",
+                                "\n",
+                                "echo \"[Update Operating System]\"\n",
+                                "export QSSTACKNAME=${AWS::StackName}",
+                                "export QSREGION=${AWS::Region}",
+                                "qs_update-os || qs_error\n",
+                                "qs_bootstrap_pip\n",
+                                "qs_aws-cfn-bootstrap\n",
+                                "echo \"[INFO]: Bootstrapping Status = $(qs_status)\"\n",
+                                "cfn-init -v ",
+                                " --stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --resource Peer0",
+                                " --configsets cisco_install",
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n",
+                                "# Signal the status from cfn-init\n",
+                                "[ $(qs_status) == 0 ] && cfn_success || echo cfn_fail",
+                                "\n",
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "Peer1": {
+            "Type": "AWS::EC2::Instance",
+            "DependsOn": [
+                "Peer0"
+            ],
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "configSets": {
+                        "cisco_install": [
+                            "run_install"
+                        ]
+                    },
+                    "run_install": {
+                        "files": {
+                            "/cbp/installer/env": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "INSTALL_TARGET=node\n",
+                                            "PEER_NAME=peer1\n",
+                                            "PEER_HOST=",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "Peer1ELB",
+                                                    "DNSName"
+                                                ]
+                                            },
+                                            "\n",
+                                            "GENESIS_PEERS=",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "Peer0ELB",
+                                                    "DNSName"
+                                                ]
+                                            },
+                                            ",",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "Peer1ELB",
+                                                    "DNSName"
+                                                ]
+                                            },
+                                            ",",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "Peer2ELB",
+                                                    "DNSName"
+                                                ]
+                                            },
+                                            "\n",
+                                            "ELK_ADDRESS=https://",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "ElasticsearchDomain",
+                                                    "DomainEndpoint"
+                                                ]
+                                            },
+                                            ":443",
+                                            "\n",
+                                            "BUCKET=",
+                                            {
+                                                "Ref": "S3BucketPrivate"
+                                            },
+                                            "\n",
+                                            "AWS_REGION=",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            "\n"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000644",
+                                "owner": "root",
+                                "group": "root"
+                            }
+                        },
+                        "commands": {
+                            "01_start_install": {
+                                "command": "echo \"start installation\""
+                            },
+                            "02_install_node": {
+                                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
+                            },
+                            "03_end_install": {
+                                "command": "echo \"done installation\""
+                            }
+                        }
+                    }
+                }
+            },
+            "Properties": {
+                "KeyName": {
+                    "Ref": "KeyPairName"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "US1604HVM"
+                    ]
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Ref": "BlockChainSecurityGroup"
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet2ID"
+                },
+                "IamInstanceProfile": {
+                    "Ref": "PeerInstanceProfile"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Peer1"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash -x\n",
+                                "function cfn_fail {",
+                                "\n",
+                                "cfn-signal -e 1 ",
+                                "--stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                " --resource Peer1",
+                                "\nexit 1\n}",
+                                "\n",
+                                "function cfn_success {",
+                                "\n",
+                                "cfn-signal -e 0 ",
+                                "--stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                " --resource Peer1",
+                                "\nexit 0\n}",
+                                "\n",
+                                "echo \"[Cloning: Load QuickStart Common Utils]\"\n",
+                                "\n",
+                                "#Once Repo is public (Use quickstart-linux-utilities submodue)\n",
+                                "git clone -b develop https://github.com/aws-quickstart/quickstart-linux-utilities.git\n",
+                                "source /quickstart-linux-utilities/quickstart-cfn-tools.source\n",
+                                "\n",
+                                "echo \"[Loaded: Load QuickStart Common Utils]\"\n",
+                                "\n",
+                                "echo \"[Update Operating System]\"\n",
+                                "export QSSTACKNAME=${AWS::StackName}",
+                                "export QSREGION=${AWS::Region}",
+                                "qs_update-os || qs_error\n",
+                                "qs_bootstrap_pip\n",
+                                "qs_aws-cfn-bootstrap\n",
+                                "echo \"[INFO]: Bootstrapping Status = $(qs_status)\"\n",
+                                "cfn-init -v ",
+                                " --stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --resource Peer1",
+                                " --configsets cisco_install",
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n",
+                                "# Signal the status from cfn-init\n",
+                                "[ $(qs_status) == 0 ] && cfn_success || echo cfn_fail",
+                                "\n",
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "Peer2": {
+            "Type": "AWS::EC2::Instance",
+            "DependsOn": [
+                "Peer0"
+            ],
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "configSets": {
+                        "cisco_install": [
+                            "run_install"
+                        ]
+                    },
+                    "run_install": {
+                        "files": {
+                            "/cbp/installer/env": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "INSTALL_TARGET=node\n",
+                                            "PEER_NAME=peer2\n",
+                                            "PEER_HOST=",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "Peer2ELB",
+                                                    "DNSName"
+                                                ]
+                                            },
+                                            "\n",
+                                            "GENESIS_PEERS=",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "Peer0ELB",
+                                                    "DNSName"
+                                                ]
+                                            },
+                                            ",",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "Peer1ELB",
+                                                    "DNSName"
+                                                ]
+                                            },
+                                            ",",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "Peer2ELB",
+                                                    "DNSName"
+                                                ]
+                                            },
+                                            "\n",
+                                            "ELK_ADDRESS=https://",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "ElasticsearchDomain",
+                                                    "DomainEndpoint"
+                                                ]
+                                            },
+                                            ":443",
+                                            "\n",
+                                            "BUCKET=",
+                                            {
+                                                "Ref": "S3BucketPrivate"
+                                            },
+                                            "\n",
+                                            "AWS_REGION=",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            "\n"
+                                        ]
+                                    ]
+                                },
+                                "mode": "000644",
+                                "owner": "root",
+                                "group": "root"
+                            }
+                        },
+                        "commands": {
+                            "01_start_install": {
+                                "command": "echo \"start installation\""
+                            },
+                            "02_install_node": {
+                                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
+                            },
+                            "03_end_install": {
+                                "command": "echo \"done installation\""
+                            }
+                        }
+                    }
+                }
+            },
+            "Properties": {
+                "KeyName": {
+                    "Ref": "KeyPairName"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AWSAMIRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "US1604HVM"
+                    ]
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Ref": "BlockChainSecurityGroup"
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "PrivateSubnet3ID"
+                },
+                "IamInstanceProfile": {
+                    "Ref": "PeerInstanceProfile"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Peer2"
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash -x\n",
+                                "function cfn_fail {",
+                                "\n",
+                                "cfn-signal -e 1 ",
+                                "--stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                " --resource Peer2",
+                                "\nexit 1\n}",
+                                "\n",
+                                "function cfn_success {",
+                                "\n",
+                                "cfn-signal -e 0 ",
+                                "--stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                " --resource Peer2",
+                                "\nexit 0\n}",
+                                "\n",
+                                "echo \"[Cloning: Load QuickStart Common Utils]\"\n",
+                                "\n",
+                                "#Once Repo is public (Use quickstart-linux-utilities submodue)\n",
+                                "git clone -b develop https://github.com/aws-quickstart/quickstart-linux-utilities.git\n",
+                                "source /quickstart-linux-utilities/quickstart-cfn-tools.source\n",
+                                "\n",
+                                "echo \"[Loaded: Load QuickStart Common Utils]\"\n",
+                                "\n",
+                                "echo \"[Update Operating System]\"\n",
+                                "export QSSTACKNAME=${AWS::StackName}",
+                                "export QSREGION=${AWS::Region}",
+                                "qs_update-os || qs_error\n",
+                                "qs_bootstrap_pip\n",
+                                "qs_aws-cfn-bootstrap\n",
+                                "echo \"[INFO]: Bootstrapping Status = $(qs_status)\"\n",
+                                "cfn-init -v ",
+                                " --stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --resource Peer2",
+                                " --configsets cisco_install",
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n",
+                                "# Signal the status from cfn-init\n",
+                                "[ $(qs_status) == 0 ] && cfn_success || echo cfn_fail",
+                                "\n",
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            }
+        },
+        "ExternalELB": {
+            "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            "Properties": {
+                "Subnets": [
+                    {
+                        "Ref": "PublicSubnet1ID"
+                    },
+                    {
+                        "Ref": "PublicSubnet2ID"
+                    },
+                    {
+                        "Ref": "PublicSubnet3ID"
+                    }
+                ],
+                "Type": "network",
+                "LoadBalancerAttributes": [
+                    {
+                        "Key": "load_balancing.cross_zone.enabled",
+                        "Value": "true"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ExternalNLB"
+                    }
+                ]
+            }
+        },
+        "Peer0ELB": {
+            "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            "Properties": {
+                "Subnets": [
+                    {
+                        "Ref": "PublicSubnet1ID"
+                    }
+                ],
+                "Type": "network",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Peer0NLB"
+                    }
+                ]
+            }
+        },
+        "Peer1ELB": {
+            "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            "Properties": {
+                "Subnets": [
+                    {
+                        "Ref": "PublicSubnet2ID"
+                    }
+                ],
+                "Type": "network",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Peer1NLB"
+                    }
+                ]
+            }
+        },
+        "Peer2ELB": {
+            "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+            "Properties": {
+                "Subnets": [
+                    {
+                        "Ref": "PublicSubnet3ID"
+                    }
+                ],
+                "Type": "network",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Peer2NLB"
+                    }
+                ]
+            }
+        },
+        "Peer0ELBTargetGroup": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "DependsOn": [
+                "Peer0"
+            ],
+            "Properties": {
+                "HealthCheckIntervalSeconds": 30,
+                "HealthCheckPort": 22,
+                "HealthCheckProtocol": "TCP",
+                "HealthyThresholdCount": 3,
+                "Port": 9090,
+                "Protocol": "TCP",
+                "UnhealthyThresholdCount": 3,
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Peer0ELBTargetGroup"
+                    }
+                ],
+                "TargetType": "ip",
+                "Targets": [
+                    {
+                        "Id": {
+                            "Fn::GetAtt": [
+                                "Peer0",
+                                "PrivateIp"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "Peer1ELBTargetGroup": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "DependsOn": [
+                "Peer1"
+            ],
+            "Properties": {
+                "HealthCheckIntervalSeconds": 30,
+                "HealthCheckPort": 22,
+                "HealthCheckProtocol": "TCP",
+                "HealthyThresholdCount": 3,
+                "Port": 9090,
+                "Protocol": "TCP",
+                "UnhealthyThresholdCount": 3,
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Peer1ELBTargetGroup"
+                    }
+                ],
+                "TargetType": "ip",
+                "Targets": [
+                    {
+                        "Id": {
+                            "Fn::GetAtt": [
+                                "Peer1",
+                                "PrivateIp"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "Peer2ELBTargetGroup": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "DependsOn": [
+                "Peer2"
+            ],
+            "Properties": {
+                "HealthCheckIntervalSeconds": 30,
+                "HealthCheckPort": 22,
+                "HealthCheckProtocol": "TCP",
+                "HealthyThresholdCount": 3,
+                "Port": 9090,
+                "Protocol": "TCP",
+                "UnhealthyThresholdCount": 3,
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Peer2ELBTargetGroup"
+                    }
+                ],
+                "TargetType": "ip",
+                "Targets": [
+                    {
+                        "Id": {
+                            "Fn::GetAtt": [
+                                "Peer2",
+                                "PrivateIp"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "Peer0RAFTTargetGroup": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "DependsOn": [
+                "Peer0"
+            ],
+            "Properties": {
+                "HealthCheckIntervalSeconds": 30,
+                "HealthCheckPort": 22,
+                "HealthCheckProtocol": "TCP",
+                "HealthyThresholdCount": 3,
+                "Port": 12379,
+                "Protocol": "TCP",
+                "UnhealthyThresholdCount": 3,
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Peer0RAFTTargetGroup"
+                    }
+                ],
+                "TargetType": "ip",
+                "Targets": [
+                    {
+                        "Id": {
+                            "Fn::GetAtt": [
+                                "Peer0",
+                                "PrivateIp"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "Peer1RAFTTargetGroup": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "DependsOn": [
+                "Peer1"
+            ],
+            "Properties": {
+                "HealthCheckIntervalSeconds": 30,
+                "HealthCheckPort": 22,
+                "HealthCheckProtocol": "TCP",
+                "HealthyThresholdCount": 3,
+                "Port": 12379,
+                "Protocol": "TCP",
+                "UnhealthyThresholdCount": 3,
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Peer1RAFTTargetGroup"
+                    }
+                ],
+                "TargetType": "ip",
+                "Targets": [
+                    {
+                        "Id": {
+                            "Fn::GetAtt": [
+                                "Peer1",
+                                "PrivateIp"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "Peer2RAFTTargetGroup": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "DependsOn": [
+                "Peer2"
+            ],
+            "Properties": {
+                "HealthCheckIntervalSeconds": 30,
+                "HealthCheckPort": 22,
+                "HealthCheckProtocol": "TCP",
+                "HealthyThresholdCount": 3,
+                "Port": 12379,
+                "Protocol": "TCP",
+                "UnhealthyThresholdCount": 3,
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Peer2RAFTTargetGroup"
+                    }
+                ],
+                "TargetType": "ip",
+                "Targets": [
+                    {
+                        "Id": {
+                            "Fn::GetAtt": [
+                                "Peer2",
+                                "PrivateIp"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "ExternalELBTargetGroup": {
+            "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+            "DependsOn": [
+                "Peer0",
+                "Peer1",
+                "Peer2"
+            ],
+            "Properties": {
+                "HealthCheckIntervalSeconds": 30,
+                "HealthCheckPort": 22,
+                "HealthCheckProtocol": "TCP",
+                "HealthyThresholdCount": 3,
+                "Port": 9090,
+                "Protocol": "TCP",
+                "UnhealthyThresholdCount": 3,
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "ExternalELBTargetGroup"
+                    }
+                ],
+                "TargetType": "ip",
+                "Targets": [
+                    {
+                        "Id": {
+                            "Fn::GetAtt": [
+                                "Peer0",
+                                "PrivateIp"
+                            ]
+                        }
+                    },
+                    {
+                        "Id": {
+                            "Fn::GetAtt": [
+                                "Peer1",
+                                "PrivateIp"
+                            ]
+                        }
+                    },
+                    {
+                        "Id": {
+                            "Fn::GetAtt": [
+                                "Peer2",
+                                "PrivateIp"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "Peer0ELBListener": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+                "DefaultActions": [
+                    {
+                        "Type": "forward",
+                        "TargetGroupArn": {
+                            "Ref": "Peer0ELBTargetGroup"
+                        }
+                    }
+                ],
+                "LoadBalancerArn": {
+                    "Ref": "Peer0ELB"
+                },
+                "Port": 9090,
+                "Protocol": "TCP"
+            }
+        },
+        "Peer1ELBListener": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+                "DefaultActions": [
+                    {
+                        "Type": "forward",
+                        "TargetGroupArn": {
+                            "Ref": "Peer1ELBTargetGroup"
+                        }
+                    }
+                ],
+                "LoadBalancerArn": {
+                    "Ref": "Peer1ELB"
+                },
+                "Port": 9090,
+                "Protocol": "TCP"
+            }
+        },
+        "Peer2ELBListener": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+                "DefaultActions": [
+                    {
+                        "Type": "forward",
+                        "TargetGroupArn": {
+                            "Ref": "Peer2ELBTargetGroup"
+                        }
+                    }
+                ],
+                "LoadBalancerArn": {
+                    "Ref": "Peer2ELB"
+                },
+                "Port": 9090,
+                "Protocol": "TCP"
+            }
+        },
+        "Peer0RAFTListener": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+                "DefaultActions": [
+                    {
+                        "Type": "forward",
+                        "TargetGroupArn": {
+                            "Ref": "Peer0RAFTTargetGroup"
+                        }
+                    }
+                ],
+                "LoadBalancerArn": {
+                    "Ref": "Peer0ELB"
+                },
+                "Port": 12379,
+                "Protocol": "TCP"
+            }
+        },
+        "Peer1RAFTListener": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+                "DefaultActions": [
+                    {
+                        "Type": "forward",
+                        "TargetGroupArn": {
+                            "Ref": "Peer1RAFTTargetGroup"
+                        }
+                    }
+                ],
+                "LoadBalancerArn": {
+                    "Ref": "Peer1ELB"
+                },
+                "Port": 12379,
+                "Protocol": "TCP"
+            }
+        },
+        "Peer2RAFTListener": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+                "DefaultActions": [
+                    {
+                        "Type": "forward",
+                        "TargetGroupArn": {
+                            "Ref": "Peer2RAFTTargetGroup"
+                        }
+                    }
+                ],
+                "LoadBalancerArn": {
+                    "Ref": "Peer2ELB"
+                },
+                "Port": 12379,
+                "Protocol": "TCP"
+            }
+        },
+        "ExternalELBListener": {
+            "Type": "AWS::ElasticLoadBalancingV2::Listener",
+            "Properties": {
+                "DefaultActions": [
+                    {
+                        "Type": "forward",
+                        "TargetGroupArn": {
+                            "Ref": "ExternalELBTargetGroup"
+                        }
+                    }
+                ],
+                "LoadBalancerArn": {
+                    "Ref": "ExternalELB"
+                },
+                "Port": 9090,
+                "Protocol": "TCP"
+            }
+        },
+        "ElasticsearchDomain": {
+            "Type": "AWS::Elasticsearch::Domain",
+            "Properties": {
+                "ElasticsearchVersion": {
+                    "Ref": "ElasticsearchVersion"
+                },
+                "ElasticsearchClusterConfig": {
+                    "InstanceCount": "2",
+                    "InstanceType": {
+                        "Ref": "ESInstanceType"
+                    },
+                    "DedicatedMasterEnabled": "false",
+                    "ZoneAwarenessEnabled": "true"
+                },
+                "EBSOptions": {
+                    "EBSEnabled": true,
+                    "VolumeSize": 10,
+                    "VolumeType": "gp2"
+                },
+                "AccessPolicies": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": "*"
+                            },
+                            "Action": "es:*",
+                            "Resource": "*"
+                        }
+                    ]
+                },
+                "VPCOptions": {
+                    "SubnetIds": [
+                        {
+                            "Ref": "PrivateSubnet1ID"
+                        },
+                        {
+                            "Ref": "PrivateSubnet2ID"
+                        }
+                    ],
+                    "SecurityGroupIds": [
+                        {
+                            "Ref": "BlockChainSecurityGroup"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "Peer0PrivateIPAddress": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "Peer0",
+                    "PrivateIp"
+                ]
+            },
+            "Description": "Private IP address for the Peer0 instance"
+        },
+        "Peer1PrivateIPAddress": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "Peer1",
+                    "PrivateIp"
+                ]
+            },
+            "Description": "Private IP address for the Peer1 instance"
+        },
+        "Peer2PrivateIPAddress": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "Peer2",
+                    "PrivateIp"
+                ]
+            },
+            "Description": "Private IP address for the Peer2 instance"
+        },
+        "ExternalELB": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "ExternalELB",
+                    "DNSName"
+                ]
+            },
+            "Description": "External Network Load Balancer Name",
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-ExternalELB"
+                }
+            }
+        },
+        "Peer0ELB": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "Peer0ELB",
+                    "DNSName"
+                ]
+            },
+            "Description": "Peer0 Network Load Balancer Name",
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-Peer0ELB"
+                }
+            }
+        },
+        "Peer1ELB": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "Peer1ELB",
+                    "DNSName"
+                ]
+            },
+            "Description": "Peer1 Network Load Balancer Name",
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-Peer1ELB"
+                }
+            }
+        },
+        "Peer2ELB": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "Peer2ELB",
+                    "DNSName"
+                ]
+            },
+            "Description": "Peer2 Network Load Balancer Name",
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-Peer2ELB"
+                }
+            }
+        },
+        "PeerInstanceRoleArn": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "PeerInstanceRole",
                     "Arn"
-                  ]
+                ]
+            },
+            "Description": "Peer Instance Role Arn"
+        },
+        "DomainArn": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "ElasticsearchDomain",
+                    "DomainArn"
+                ]
+            }
+        },
+        "DomainEndpoint": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "ElasticsearchDomain",
+                    "DomainEndpoint"
+                ]
+            }
+        },
+        "S3BucketPrivate": {
+            "Value": {
+                "Ref": "S3BucketPrivate"
+            },
+            "Description": "Private S3 bucket for SSL certs",
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-S3BucketPrivate"
                 }
-              ]
-            },
-            {
-              "Effect": "Allow",
-              "Action": [
-                "s3:PutObject",
-                "s3:GetObject",
-                "s3:DeleteObject"
-              ],
-              "Resource": [
-                {
-                  "Fn::Sub": "${S3BucketPrivate.Arn}/*"
-                }
-              ]
             }
-          ]
-        },
-        "Roles": [
-          {
-            "Ref": "PeerInstanceRole"
-          }
-        ]
-      }
-    },
-    "PeerInstanceProfile": {
-      "Type": "AWS::IAM::InstanceProfile",
-      "Properties": {
-        "Path": "/",
-        "Roles": [
-          {
-            "Ref": "PeerInstanceRole"
-          }
-        ]
-      }
-    },
-    "Peer0": {
-      "Type": "AWS::EC2::Instance",
-      "DependsOn": [
-        "ElasticsearchDomain"
-      ],
-      "Metadata": {
-        "AWS::CloudFormation::Init": {
-          "configSets": {
-            "cisco_install": [
-              "run_install"
-            ]
-          },
-          "run_install": {
-            "files": {
-              "/cbp/installer/env": {
-                "content": { "Fn::Join" : [ "", [
-                    "INSTALL_TARGET=node\n",
-                    "PEER_NAME=peer0\n",
-                    "PEER_HOST=", { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, "\n",
-                    "GENESIS_PEERS=",
-                      { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
-                      { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
-                      { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
-                    "ELK_ADDRESS=https://", { "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"] }, ":443", "\n",
-                    "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
-                    "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
-                    ]
-                  ]
-                },
-                "mode": "000644",
-                "owner": "root",
-                "group": "root"
-              }
-            },
-            "commands": {
-              "01_start_install": {
-                "command": "echo \"start installation\""
-              },
-              "02_install_node": {
-                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
-              },
-              "10_end_install": {
-                "command": "echo \"done installation\""
-              }
-            }
-          }
         }
-      },
-      "Properties": {
-        "KeyName": {
-          "Ref": "KeyPairName"
-        },
-        "ImageId": {
-          "Fn::FindInMap": [
-            "AWSAMIRegionMap",
-            {
-              "Ref": "AWS::Region"
-            },
-            "US1604HVM"
-          ]
-        },
-        "InstanceType": {
-          "Ref": "InstanceType"
-        },
-        "SecurityGroupIds": [
-          {
-            "Ref": "BlockChainSecurityGroup"
-          }
-        ],
-        "SubnetId": {
-          "Ref": "PrivateSubnet1ID"
-        },
-        "IamInstanceProfile": {
-          "Ref": "PeerInstanceProfile"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "Peer0"
-          }
-        ],
-        "UserData": {
-          "Fn::Base64": {
-            "Fn::Join": [
-              "",
-              [
-                "#!/bin/bash -x\n",
-                "function cfn_fail {",
-                "\n",
-                "cfn-signal -e 1 ",
-                "--stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                " --resource Peer0",
-                "\nexit 1\n}",
-                "\n",
-                "function cfn_success {",
-                "\n",
-                "cfn-signal -e 0 ",
-                "--stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                " --resource Peer0",
-                "\nexit 0\n}",
-                "\n",
-                "echo \"[Cloning: Load QuickStart Common Utils]\"\n",
-                "\n",
-                "#Once Repo is public (Use quickstart-linux-utilities submodue)\n",
-                "git clone -b develop https://github.com/aws-quickstart/quickstart-linux-utilities.git\n",
-                "source /quickstart-linux-utilities/quickstart-cfn-tools.source\n",
-                "\n",
-                "echo \"[Loaded: Load QuickStart Common Utils]\"\n",
-                "\n",
-                "echo \"[Update Operating System]\"\n",
-                "export QSSTACKNAME=${AWS::StackName}",
-                "export QSREGION=${AWS::Region}",
-                "qs_update-os || qs_error\n",
-                "qs_bootstrap_pip\n",
-                "qs_aws-cfn-bootstrap\n",
-                "echo \"[INFO]: Bootstrapping Status = $(qs_status)\"\n",
-                "cfn-init -v ",
-                " --stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --resource Peer0",
-                " --configsets cisco_install",
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                "\n",
-                "# Signal the status from cfn-init\n",
-                "[ $(qs_status) == 0 ] && cfn_success || echo cfn_fail",
-                "\n",
-                "\n"
-              ]
-            ]
-          }
-        }
-      }
-    },
-    "Peer1": {
-      "Type": "AWS::EC2::Instance",
-      "DependsOn": [
-        "Peer0"
-      ],
-      "Metadata": {
-        "AWS::CloudFormation::Init": {
-          "configSets": {
-            "cisco_install": [
-              "run_install"
-            ]
-          },
-          "run_install": {
-            "files": {
-              "/cbp/installer/env": {
-                "content": { "Fn::Join" : [ "", [
-                    "INSTALL_TARGET=node\n",
-                    "PEER_NAME=peer1\n",
-                    "PEER_HOST=", { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, "\n",
-                    "GENESIS_PEERS=",
-                      { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
-                      { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
-                      { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
-                    "ELK_ADDRESS=https://", { "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"] }, ":443", "\n",
-                    "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
-                    "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
-                    ]
-                  ]
-                },
-                "mode": "000644",
-                "owner": "root",
-                "group": "root"
-              }
-            },
-            "commands": {
-              "01_start_install": {
-                "command": "echo \"start installation\""
-              },
-              "02_install_node": {
-                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
-              },
-              "03_end_install": {
-                "command": "echo \"done installation\""
-              }
-            }
-          }
-        }
-      },
-      "Properties": {
-        "KeyName": {
-          "Ref": "KeyPairName"
-        },
-        "ImageId": {
-          "Fn::FindInMap": [
-            "AWSAMIRegionMap",
-            {
-              "Ref": "AWS::Region"
-            },
-            "US1604HVM"
-          ]
-        },
-        "InstanceType": {
-          "Ref": "InstanceType"
-        },
-        "SecurityGroupIds": [
-          {
-            "Ref": "BlockChainSecurityGroup"
-          }
-        ],
-        "SubnetId": {
-          "Ref": "PrivateSubnet2ID"
-        },
-        "IamInstanceProfile": {
-          "Ref": "PeerInstanceProfile"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "Peer1"
-          }
-        ],
-        "UserData": {
-          "Fn::Base64": {
-            "Fn::Join": [
-              "",
-              [
-                "#!/bin/bash -x\n",
-                "function cfn_fail {",
-                "\n",
-                "cfn-signal -e 1 ",
-                "--stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                " --resource Peer1",
-                "\nexit 1\n}",
-                "\n",
-                "function cfn_success {",
-                "\n",
-                "cfn-signal -e 0 ",
-                "--stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                " --resource Peer1",
-                "\nexit 0\n}",
-                "\n",
-                "echo \"[Cloning: Load QuickStart Common Utils]\"\n",
-                "\n",
-                "#Once Repo is public (Use quickstart-linux-utilities submodue)\n",
-                "git clone -b develop https://github.com/aws-quickstart/quickstart-linux-utilities.git\n",
-                "source /quickstart-linux-utilities/quickstart-cfn-tools.source\n",
-                "\n",
-                "echo \"[Loaded: Load QuickStart Common Utils]\"\n",
-                "\n",
-                "echo \"[Update Operating System]\"\n",
-                "export QSSTACKNAME=${AWS::StackName}",
-                "export QSREGION=${AWS::Region}",
-                "qs_update-os || qs_error\n",
-                "qs_bootstrap_pip\n",
-                "qs_aws-cfn-bootstrap\n",
-                "echo \"[INFO]: Bootstrapping Status = $(qs_status)\"\n",
-                "cfn-init -v ",
-                " --stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --resource Peer1",
-                " --configsets cisco_install",
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                "\n",
-                "# Signal the status from cfn-init\n",
-                "[ $(qs_status) == 0 ] && cfn_success || echo cfn_fail",
-                "\n",
-                "\n"
-              ]
-            ]
-          }
-        }
-      }
-    },
-    "Peer2": {
-      "Type": "AWS::EC2::Instance",
-      "DependsOn": [
-        "Peer0"
-      ],
-      "Metadata": {
-        "AWS::CloudFormation::Init": {
-          "configSets": {
-            "cisco_install": [
-              "run_install"
-            ]
-          },
-          "run_install": {
-            "files": {
-              "/cbp/installer/env": {
-                "content": { "Fn::Join" : [ "", [
-                    "INSTALL_TARGET=node\n",
-                    "PEER_NAME=peer2\n",
-                    "PEER_HOST=", { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
-                    "GENESIS_PEERS=",
-                      { "Fn::GetAtt": [ "Peer0ELB",  "DNSName" ] }, ",",
-                      { "Fn::GetAtt": [ "Peer1ELB",  "DNSName" ] }, ",",
-                      { "Fn::GetAtt": [ "Peer2ELB",  "DNSName" ] }, "\n",
-                    "ELK_ADDRESS=https://", { "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"] }, ":443", "\n",
-                    "BUCKET=", { "Ref": "S3BucketPrivate" }, "\n",
-                    "AWS_REGION=", { "Ref": "AWS::Region" }, "\n"
-                    ]
-                  ]
-                },
-                "mode": "000644",
-                "owner": "root",
-                "group": "root"
-              }
-            },
-            "commands": {
-              "01_start_install": {
-                "command": "echo \"start installation\""
-              },
-              "02_install_node": {
-                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
-              },
-              "03_end_install": {
-                "command": "echo \"done installation\""
-              }
-            }
-          }
-        }
-      },
-      "Properties": {
-        "KeyName": {
-          "Ref": "KeyPairName"
-        },
-        "ImageId": {
-          "Fn::FindInMap": [
-            "AWSAMIRegionMap",
-            {
-              "Ref": "AWS::Region"
-            },
-            "US1604HVM"
-          ]
-        },
-        "InstanceType": {
-          "Ref": "InstanceType"
-        },
-        "SecurityGroupIds": [
-          {
-            "Ref": "BlockChainSecurityGroup"
-          }
-        ],
-        "SubnetId": {
-          "Ref": "PrivateSubnet3ID"
-        },
-        "IamInstanceProfile": {
-          "Ref": "PeerInstanceProfile"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "Peer2"
-          }
-        ],
-        "UserData": {
-          "Fn::Base64": {
-            "Fn::Join": [
-              "",
-              [
-                "#!/bin/bash -x\n",
-                "function cfn_fail {",
-                "\n",
-                "cfn-signal -e 1 ",
-                "--stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                " --resource Peer2",
-                "\nexit 1\n}",
-                "\n",
-                "function cfn_success {",
-                "\n",
-                "cfn-signal -e 0 ",
-                "--stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                " --resource Peer2",
-                "\nexit 0\n}",
-                "\n",
-                "echo \"[Cloning: Load QuickStart Common Utils]\"\n",
-                "\n",
-                "#Once Repo is public (Use quickstart-linux-utilities submodue)\n",
-                "git clone -b develop https://github.com/aws-quickstart/quickstart-linux-utilities.git\n",
-                "source /quickstart-linux-utilities/quickstart-cfn-tools.source\n",
-                "\n",
-                "echo \"[Loaded: Load QuickStart Common Utils]\"\n",
-                "\n",
-                "echo \"[Update Operating System]\"\n",
-                "export QSSTACKNAME=${AWS::StackName}",
-                "export QSREGION=${AWS::Region}",
-                "qs_update-os || qs_error\n",
-                "qs_bootstrap_pip\n",
-                "qs_aws-cfn-bootstrap\n",
-                "echo \"[INFO]: Bootstrapping Status = $(qs_status)\"\n",
-                "cfn-init -v ",
-                " --stack ",
-                {
-                  "Ref": "AWS::StackName"
-                },
-                " --resource Peer2",
-                " --configsets cisco_install",
-                " --region ",
-                {
-                  "Ref": "AWS::Region"
-                },
-                "\n",
-                "# Signal the status from cfn-init\n",
-                "[ $(qs_status) == 0 ] && cfn_success || echo cfn_fail",
-                "\n",
-                "\n"
-              ]
-            ]
-          }
-        }
-      }
-    },
-    "ExternalELB": {
-      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
-      "Properties": {
-        "Subnets": [
-          {
-            "Ref": "PublicSubnet1ID"
-          },
-          {
-            "Ref": "PublicSubnet2ID"
-          },
-          {
-            "Ref": "PublicSubnet3ID"
-          }
-        ],
-        "Type": "network",
-        "LoadBalancerAttributes": [
-          {
-            "Key": "load_balancing.cross_zone.enabled",
-            "Value": "true"
-          }
-        ],
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "ExternalNLB"
-          }
-        ]
-      }
-    },
-    "Peer0ELB": {
-      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
-      "Properties": {
-        "Subnets": [
-          {
-            "Ref": "PublicSubnet1ID"
-          }
-        ],
-        "Type": "network",
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "Peer0NLB"
-          }
-        ]
-      }
-    },
-    "Peer1ELB": {
-      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
-      "Properties": {
-        "Subnets": [
-          {
-            "Ref": "PublicSubnet2ID"
-          }
-        ],
-        "Type": "network",
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "Peer1NLB"
-          }
-        ]
-      }
-    },
-    "Peer2ELB": {
-      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
-      "Properties": {
-        "Subnets": [
-          {
-            "Ref": "PublicSubnet3ID"
-          }
-        ],
-        "Type": "network",
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "Peer2NLB"
-          }
-        ]
-      }
-    },
-    "Peer0ELBTargetGroup": {
-      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
-      "DependsOn": [
-        "Peer0"
-      ],
-      "Properties": {
-        "HealthCheckIntervalSeconds": 30,
-        "HealthCheckPort": 22,
-        "HealthCheckProtocol": "TCP",
-        "HealthyThresholdCount": 3,
-        "Port": 9090,
-        "Protocol": "TCP",
-        "UnhealthyThresholdCount": 3,
-        "VpcId": {
-          "Ref": "VPCID"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "Peer0ELBTargetGroup"
-          }
-        ],
-        "TargetType": "ip",
-        "Targets": [
-          {
-            "Id": {
-              "Fn::GetAtt": [
-                "Peer0",
-                "PrivateIp"
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "Peer1ELBTargetGroup": {
-      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
-      "DependsOn": [
-        "Peer1"
-      ],
-      "Properties": {
-        "HealthCheckIntervalSeconds": 30,
-        "HealthCheckPort": 22,
-        "HealthCheckProtocol": "TCP",
-        "HealthyThresholdCount": 3,
-        "Port": 9090,
-        "Protocol": "TCP",
-        "UnhealthyThresholdCount": 3,
-        "VpcId": {
-          "Ref": "VPCID"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "Peer1ELBTargetGroup"
-          }
-        ],
-        "TargetType": "ip",
-        "Targets": [
-          {
-            "Id": {
-              "Fn::GetAtt": [
-                "Peer1",
-                "PrivateIp"
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "Peer2ELBTargetGroup": {
-      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
-      "DependsOn": [
-        "Peer2"
-      ],
-      "Properties": {
-        "HealthCheckIntervalSeconds": 30,
-        "HealthCheckPort": 22,
-        "HealthCheckProtocol": "TCP",
-        "HealthyThresholdCount": 3,
-        "Port": 9090,
-        "Protocol": "TCP",
-        "UnhealthyThresholdCount": 3,
-        "VpcId": {
-          "Ref": "VPCID"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "Peer2ELBTargetGroup"
-          }
-        ],
-        "TargetType": "ip",
-        "Targets": [
-          {
-            "Id": {
-              "Fn::GetAtt": [
-                "Peer2",
-                "PrivateIp"
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "Peer0RAFTTargetGroup": {
-      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
-      "DependsOn": [
-        "Peer0"
-      ],
-      "Properties": {
-        "HealthCheckIntervalSeconds": 30,
-        "HealthCheckPort": 22,
-        "HealthCheckProtocol": "TCP",
-        "HealthyThresholdCount": 3,
-        "Port": 12379,
-        "Protocol": "TCP",
-        "UnhealthyThresholdCount": 3,
-        "VpcId": {
-          "Ref": "VPCID"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "Peer0RAFTTargetGroup"
-          }
-        ],
-        "TargetType": "ip",
-        "Targets": [
-          {
-            "Id": {
-              "Fn::GetAtt": [
-                "Peer0",
-                "PrivateIp"
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "Peer1RAFTTargetGroup": {
-      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
-      "DependsOn": [
-        "Peer1"
-      ],
-      "Properties": {
-        "HealthCheckIntervalSeconds": 30,
-        "HealthCheckPort": 22,
-        "HealthCheckProtocol": "TCP",
-        "HealthyThresholdCount": 3,
-        "Port": 12379,
-        "Protocol": "TCP",
-        "UnhealthyThresholdCount": 3,
-        "VpcId": {
-          "Ref": "VPCID"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "Peer1RAFTTargetGroup"
-          }
-        ],
-        "TargetType": "ip",
-        "Targets": [
-          {
-            "Id": {
-              "Fn::GetAtt": [
-                "Peer1",
-                "PrivateIp"
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "Peer2RAFTTargetGroup": {
-      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
-      "DependsOn": [
-        "Peer2"
-      ],
-      "Properties": {
-        "HealthCheckIntervalSeconds": 30,
-        "HealthCheckPort": 22,
-        "HealthCheckProtocol": "TCP",
-        "HealthyThresholdCount": 3,
-        "Port": 12379,
-        "Protocol": "TCP",
-        "UnhealthyThresholdCount": 3,
-        "VpcId": {
-          "Ref": "VPCID"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "Peer2RAFTTargetGroup"
-          }
-        ],
-        "TargetType": "ip",
-        "Targets": [
-          {
-            "Id": {
-              "Fn::GetAtt": [
-                "Peer2",
-                "PrivateIp"
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "ExternalELBTargetGroup": {
-      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
-      "DependsOn": [
-        "Peer0",
-        "Peer1",
-        "Peer2"
-      ],
-      "Properties": {
-        "HealthCheckIntervalSeconds": 30,
-        "HealthCheckPort": 22,
-        "HealthCheckProtocol": "TCP",
-        "HealthyThresholdCount": 3,
-        "Port": 9090,
-        "Protocol": "TCP",
-        "UnhealthyThresholdCount": 3,
-        "VpcId": {
-          "Ref": "VPCID"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "ExternalELBTargetGroup"
-          }
-        ],
-        "TargetType": "ip",
-        "Targets": [
-          {
-            "Id": {
-              "Fn::GetAtt": [
-                "Peer0",
-                "PrivateIp"
-              ]
-            }
-          },
-          {
-            "Id": {
-              "Fn::GetAtt": [
-                "Peer1",
-                "PrivateIp"
-              ]
-            }
-          },
-          {
-            "Id": {
-              "Fn::GetAtt": [
-                "Peer2",
-                "PrivateIp"
-              ]
-            }
-          }
-        ]
-      }
-    },
-    "Peer0ELBListener": {
-      "Type": "AWS::ElasticLoadBalancingV2::Listener",
-      "Properties": {
-        "DefaultActions": [
-          {
-            "Type": "forward",
-            "TargetGroupArn": {
-              "Ref": "Peer0ELBTargetGroup"
-            }
-          }
-        ],
-        "LoadBalancerArn": {
-          "Ref": "Peer0ELB"
-        },
-        "Port": 9090,
-        "Protocol": "TCP"
-      }
-    },
-    "Peer1ELBListener": {
-      "Type": "AWS::ElasticLoadBalancingV2::Listener",
-      "Properties": {
-        "DefaultActions": [
-          {
-            "Type": "forward",
-            "TargetGroupArn": {
-              "Ref": "Peer1ELBTargetGroup"
-            }
-          }
-        ],
-        "LoadBalancerArn": {
-          "Ref": "Peer1ELB"
-        },
-        "Port": 9090,
-        "Protocol": "TCP"
-      }
-    },
-    "Peer2ELBListener": {
-      "Type": "AWS::ElasticLoadBalancingV2::Listener",
-      "Properties": {
-        "DefaultActions": [
-          {
-            "Type": "forward",
-            "TargetGroupArn": {
-              "Ref": "Peer2ELBTargetGroup"
-            }
-          }
-        ],
-        "LoadBalancerArn": {
-          "Ref": "Peer2ELB"
-        },
-        "Port": 9090,
-        "Protocol": "TCP"
-      }
-    },
-    "Peer0RAFTListener": {
-      "Type": "AWS::ElasticLoadBalancingV2::Listener",
-      "Properties": {
-        "DefaultActions": [
-          {
-            "Type": "forward",
-            "TargetGroupArn": {
-              "Ref": "Peer0RAFTTargetGroup"
-            }
-          }
-        ],
-        "LoadBalancerArn": {
-          "Ref": "Peer0ELB"
-        },
-        "Port": 12379,
-        "Protocol": "TCP"
-      }
-    },
-    "Peer1RAFTListener": {
-      "Type": "AWS::ElasticLoadBalancingV2::Listener",
-      "Properties": {
-        "DefaultActions": [
-          {
-            "Type": "forward",
-            "TargetGroupArn": {
-              "Ref": "Peer1RAFTTargetGroup"
-            }
-          }
-        ],
-        "LoadBalancerArn": {
-          "Ref": "Peer1ELB"
-        },
-        "Port": 12379,
-        "Protocol": "TCP"
-      }
-    },
-    "Peer2RAFTListener": {
-      "Type": "AWS::ElasticLoadBalancingV2::Listener",
-      "Properties": {
-        "DefaultActions": [
-          {
-            "Type": "forward",
-            "TargetGroupArn": {
-              "Ref": "Peer2RAFTTargetGroup"
-            }
-          }
-        ],
-        "LoadBalancerArn": {
-          "Ref": "Peer2ELB"
-        },
-        "Port": 12379,
-        "Protocol": "TCP"
-      }
-    },
-    "ExternalELBListener": {
-      "Type": "AWS::ElasticLoadBalancingV2::Listener",
-      "Properties": {
-        "DefaultActions": [
-          {
-            "Type": "forward",
-            "TargetGroupArn": {
-              "Ref": "ExternalELBTargetGroup"
-            }
-          }
-        ],
-        "LoadBalancerArn": {
-          "Ref": "ExternalELB"
-        },
-        "Port": 9090,
-        "Protocol": "TCP"
-      }
-    },
-    "ElasticsearchDomain": {
-      "Type": "AWS::Elasticsearch::Domain",
-      "Properties": {
-        "ElasticsearchVersion": { "Ref": "ElasticsearchVersion" },
-        "ElasticsearchClusterConfig": {
-          "InstanceCount": "2",
-          "InstanceType": { "Ref": "ESInstanceType" },
-          "DedicatedMasterEnabled": "false",
-          "ZoneAwarenessEnabled": "true"
-        },
-        "EBSOptions": {
-          "EBSEnabled": true,
-          "VolumeSize": 10,
-          "VolumeType": "gp2"
-        },
-        "AccessPolicies": {
-          "Version": "2012-10-17",
-          "Statement": [{
-            "Effect": "Allow",
-            "Principal": {
-              "AWS": "*"
-            },
-            "Action": "es:*",
-            "Resource": "*"
-          }]
-        },
-        "VPCOptions" : {
-          "SubnetIds" : [
-            {"Ref" : "PrivateSubnet1ID"},
-            {"Ref" : "PrivateSubnet2ID"}
-          ],
-          "SecurityGroupIds" : [
-            {"Ref" : "BlockChainSecurityGroup"}
-          ]
-        }
-      }
     }
-  },
-  "Outputs": {
-    "Peer0PrivateIPAddress": {
-      "Value": {
-        "Fn::GetAtt": [
-          "Peer0",
-          "PrivateIp"
-        ]
-      },
-      "Description": "Private IP address for the Peer0 instance"
-    },
-    "Peer1PrivateIPAddress": {
-      "Value": {
-        "Fn::GetAtt": [
-          "Peer1",
-          "PrivateIp"
-        ]
-      },
-      "Description": "Private IP address for the Peer1 instance"
-    },
-    "Peer2PrivateIPAddress": {
-      "Value": {
-        "Fn::GetAtt": [
-          "Peer2",
-          "PrivateIp"
-        ]
-      },
-      "Description": "Private IP address for the Peer2 instance"
-    },
-    "ExternalELB": {
-      "Value": {
-        "Fn::GetAtt": [
-          "ExternalELB",
-          "DNSName"
-        ]
-      },
-      "Description": "External Network Load Balancer Name",
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-ExternalELB"
-        }
-      }
-    },
-    "Peer0ELB": {
-      "Value": {
-        "Fn::GetAtt": [
-          "Peer0ELB",
-          "DNSName"
-        ]
-      },
-      "Description": "Peer0 Network Load Balancer Name",
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-Peer0ELB"
-        }
-      }
-    },
-    "Peer1ELB": {
-      "Value": {
-        "Fn::GetAtt": [
-          "Peer1ELB",
-          "DNSName"
-        ]
-      },
-      "Description": "Peer1 Network Load Balancer Name",
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-Peer1ELB"
-        }
-      }
-    },
-    "Peer2ELB": {
-      "Value": {
-        "Fn::GetAtt": [
-          "Peer2ELB",
-          "DNSName"
-        ]
-      },
-      "Description": "Peer2 Network Load Balancer Name",
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-Peer2ELB"
-        }
-      }
-    },
-    "PeerInstanceRoleArn": {
-      "Value": {
-        "Fn::GetAtt": [
-          "PeerInstanceRole",
-          "Arn"
-        ]
-      },
-      "Description": "Peer Instance Role Arn"
-    },
-    "DomainArn": {
-      "Value": {
-        "Fn::GetAtt": ["ElasticsearchDomain", "DomainArn"]
-      }
-    },
-    "DomainEndpoint": {
-      "Value": {
-        "Fn::GetAtt": ["ElasticsearchDomain", "DomainEndpoint"]
-      }
-    },
-    "S3BucketPrivate": {
-      "Value": {
-        "Ref": "S3BucketPrivate"
-      },
-      "Description": "Private S3 bucket for SSL certs",
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-S3BucketPrivate"
-        }
-      }
-    }
-  }
 }
