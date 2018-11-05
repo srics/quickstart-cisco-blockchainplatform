@@ -236,64 +236,6 @@
               }
           }
       }
-    },
-    "BlockchainPortalStack": {
-      "DependsOn": [
-        "BlockchainNodeStack"
-      ],
-      "Type": "AWS::CloudFormation::Stack",
-      "Properties": {
-          "TemplateURL": {
-              "Fn::Sub": "https://${QSS3BucketName}.s3.amazonaws.com/${QSS3KeyPrefix}templates/cisco-blockchain-portal.template"
-          },
-          "Parameters": {
-              "InstanceType": {
-                  "Ref": "InstanceType"
-              },
-              "KeyPairName": {
-                  "Ref": "KeyPairName"
-              },
-              "PublicSubnet1ID": {
-                  "Ref": "PublicSubnet1ID"
-              },
-              "PrivateSubnet1ID": {
-                  "Ref": "PrivateSubnet1ID"
-              },
-              "PeerHostName": {
-                "Fn::GetAtt": [
-                    "BlockchainNodeStack",
-                    "Outputs.Peer0ELB"
-                ]
-              },
-              "S3BucketName": {
-                "Fn::GetAtt": [
-                    "BlockchainNodeStack",
-                    "Outputs.S3BucketPrivate"
-                ]
-              },
-              "ESDomainName": {
-                "Fn::GetAtt": [
-                    "BlockchainNodeStack",
-                    "Outputs.DomainEndpoint"
-                ]
-              },
-              "QSS3BucketName": {
-                  "Ref": "QSS3BucketName"
-              },
-              "QSS3KeyPrefix": {
-                  "Ref": "QSS3KeyPrefix"
-              },
-              "RemoteAccessCIDR": {
-                  "Ref": "RemoteAccessCIDR"
-              },
-              "BlockChainAccessCIDR": {
-                  "Ref": "BlockChainAccessCIDR"
-              },
-              "VPCID": {
-                  "Ref": "VPCID"
-              }
-          }
-      }
     }
   }
 }
