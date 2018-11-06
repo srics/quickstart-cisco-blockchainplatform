@@ -1,6 +1,6 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-        "Description": "CiscoBlockChain + QuickStart VPC, Apache 2.0 (Please do not remove) April,5,2018",
+        "Description": "CiscoBlockChain + QuickStart VPC, Apache 2.0 (Please do not remove) November,6,2018 (qs-1p0sk9m88)",
         "Metadata": {
             "AWS::CloudFormation::Interface": {
                 "ParameterGroups": [

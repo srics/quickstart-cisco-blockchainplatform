@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Cisco BlockChain Template",
+  "Description": "Cisco BlockChain template Apache 2.0 (Please do not remove) November,6,2018 (qs-1p0sk9m8d)",
   "Metadata": {
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [
