@@ -21,12 +21,14 @@
         },
         {
           "Label": {
-            "default": "BlockChain EC2 Configuration"
+            "default": "Cisoc BlockChain Configuration"
           },
           "Parameters": [
             "KeyPairName",
             "BlockChainAccessCIDR",
-            "InstanceType"
+            "InstanceType",
+            "ElasticsearchVersion",
+            "ESInstanceType"
           ]
         },
         {
@@ -42,6 +44,15 @@
       "ParameterLabels": {
         "KeyPairName": {
           "default": "Key Pair Name"
+        },
+        "InstanceType": {
+          "default": "BlockChain InstanceType"
+        },
+        "ESInstanceType": {
+          "default": "Elastic Search InstanceType"
+        },
+        "ElasticsearchVersion": {
+          "default": "Elastic Search Version"
         },
         "PublicSubnet1ID": {
           "default": "Public Subnet 1 ID"
