@@ -115,7 +115,7 @@
                         "default": "Allowed External Access CIDR"
                     },
                     "RemoteAccessCIDR": {
-                        "default": "Allowed External Access CIDR"
+                        "default": "Allowed Remote SSH Access CIDR"
                     },
                     "VPCCIDR": {
                         "default": "VPC CIDR"
@@ -127,7 +127,7 @@
                         "default": "SSH Key Name"
                     },
                     "InstanceType": {
-                        "default": "CiscoBlockChain Instance Type"
+                        "default": "CiscoBlockchain Instance Type"
                     },
                     "NumberOfAZs": {
                         "default": "Number of used AZs"
@@ -148,30 +148,26 @@
                 "Type": "AWS::EC2::KeyPair::KeyName"
             },
             "InstanceType": {
-                "Description": "Instance type for CiscoBlockChain Nodes",
+                "Description": "Instance type for CiscoBlockchain Nodes",
                 "Type": "String",
-                "Default": "t2.large",
+                "Default": "t2.xlarge",
                 "AllowedValues": [
                     "t2.large",
+                "t2.xlarge",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "m4.large",
                 "m4.xlarge",
                 "m4.2xlarge",
-                "m4.4xlarge",
-                "m4.10xlarge",
-                "m4.16xlarge",
-                "r4.xlarge",
-                "r4.2xlarge",
-                "r4.4xlarge",
-                "r4.8xlarge",
-                "r4.16xlarge"
+                "m4.4xlarge"
                 ]
             },
             "NumberOfAZs": {
                 "AllowedValues": [
-                    "2",
                 "3",
-                "4"
                 ],
-                "Default": "2",
+                "Default": "3",
                 "Description": "Number of Availability Zones to use in the VPC. This must match your selections in the list of Availability Zones parameter.",
                 "Type": "String"
             },
