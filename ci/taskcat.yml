@@ -3,15 +3,9 @@ global:
   owner: quickstart-eng@amazon.com
   qsname: quickstart-cisco-blockchainplatform
   regions:
-    - ap-northeast-1
-    - ap-northeast-2
-    - ap-south-1
     - ap-southeast-1
-    - ap-southeast-2
-    - ca-central-1
-    - eu-central-1
     - eu-west-1
-    - sa-east-1
+    - eu-west-2
     - us-east-1
     - us-east-2
     - us-west-1
@@ -21,5 +15,3 @@ tests:
   cisco-blockchain:
     parameter_input: cisco-blockchain-master-inputs.json
     template_file: cisco-blockchain-master.template
-    regions:
-      - us-east-1
