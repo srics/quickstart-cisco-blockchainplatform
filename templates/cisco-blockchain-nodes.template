@@ -71,7 +71,7 @@
                     "default": "Allowed SSH Access CIDR"
                 },
                 "BlockChainAccessCIDR": {
-                    "default": "Allowed Application Access CIDR"
+                    "default": "Allowed Blockchain Access CIDR"
                 },
                 "VPCID": {
                     "default": "VPC ID"
@@ -82,10 +82,8 @@
     "Parameters": {
         "InstanceType": {
             "AllowedValues": [
-                "t2.micro",
-                "t2.small",
-                "t2.medium",
                 "t2.large",
+                "t2.xlarge",
                 "m3.large",
                 "m3.xlarge",
                 "m3.2xlarge",
@@ -94,8 +92,8 @@
                 "m4.2xlarge",
                 "m4.4xlarge"
             ],
-            "Default": "t2.micro",
-            "Description": "Amazon EC2 instance type for the bastion instances",
+            "Default": "t2.xlarge",
+            "Description": "Amazon EC2 instance type for the blockchain instances",
             "Type": "String"
         },
         "KeyPairName": {
@@ -172,7 +170,10 @@
                 "US1604HVM": "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-20181012"
             },
             "us-east-1": {
-                "US1604HVM": "ami-0735ea082a1534cac"
+                "US1604HVM": "ami-0f6d1704cce4202fe"
+            },
+            "eu-west-1": {
+                "US1604HVM": "ami-09cd265f8366fea3f"
             }
         }
     },
@@ -436,9 +437,9 @@
                                 "command": "echo \"start installation\""
                             },
                             "02_install_node": {
-                                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
+                                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer:0.5.0-aws"
                             },
-                            "10_end_install": {
+                            "03_end_install": {
                                 "command": "echo \"done installation\""
                             }
                         }
@@ -632,7 +633,7 @@
                                 "command": "echo \"start installation\""
                             },
                             "02_install_node": {
-                                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
+                                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer:0.5.0-aws"
                             },
                             "03_end_install": {
                                 "command": "echo \"done installation\""
@@ -828,7 +829,7 @@
                                 "command": "echo \"start installation\""
                             },
                             "02_install_node": {
-                                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer"
+                                "command": "docker run --name installer -i --volume /cbp/certs:/certs --volume /cbp/installer:/installer --volume /var/run/docker.sock:/var/run/docker.sock --env-file /cbp/installer/env ciscoblockchain/vera_installer:0.5.0-aws"
                             },
                             "03_end_install": {
                                 "command": "echo \"done installation\""
