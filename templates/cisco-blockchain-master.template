@@ -43,7 +43,9 @@
                     "Parameters": [
                         "KeyPairName",
                     "BlockChainAccessCIDR",
-                    "InstanceType"
+                    "InstanceType",
+                    "ElasticsearchVersion",
+                    "ESInstanceType"
                     ]
                 },
                 {
@@ -122,6 +124,12 @@
                     },
                     "InstanceType": {
                         "default": "BlockChain InstanceType"
+                    },
+                    "ESInstanceType": {
+                        "default": "Elastic Search InstanceType"
+                    },
+                    "ElasticsearchVersion": {
+                        "default": "Elastic Search Version"
                     },
                     "NumberOfAZs": {
                         "default": "Number of used AZs"
@@ -314,6 +322,15 @@
                 "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
                 "Description": "Allowed CIDR block for external Blockchain access",
                 "Type": "String"
+            },
+            "ElasticsearchVersion" : {
+                "Description" : "User defined Elasticsearch Version",
+                "Type" : "String",
+                "Default": "6.3"
+           },
+           "ESInstanceType" : {
+                "Default": "t2.small.elasticsearch",
+                "Type" : "String"
             },
             "VPCCIDR": {
                 "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/(1[6-9]|2[0-8]))$",
@@ -533,8 +550,14 @@
                         "RemoteAccessCIDR": {
                             "Ref": "RemoteAccessCIDR"
                         },
-                        "BlockChainAccessCIDR": {
-                            "Ref": "BlockChainAccessCIDR"
+                        "ElasticsearchVersion": {
+                            "Ref": "ElasticsearchVersion"
+                        },
+                        "ElasticsearchVersion": {
+                            "Ref": "ElasticsearchVersion"
+                        },
+                        "ESInstanceType": {
+                            "Ref": "ESInstanceType"
                         },
                         "VPCID": {
                             "Fn::GetAtt": [
