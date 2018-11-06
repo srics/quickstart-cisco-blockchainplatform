@@ -18,17 +18,7 @@
                     "PublicSubnet2CIDR",
                     "PublicSubnet3CIDR",
                     "RemoteAccessCIDR",
-                    "BlockChainAccessCIDR",
                     "VPCCIDR"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Amazon EC2 Configuration"
-                    },
-                    "Parameters": [
-                        "KeyPairName",
-                    "InstanceType"
                     ]
                 },
                 {
@@ -50,7 +40,11 @@
                     "Label": {
                         "default": "CiscoBlockChain Configuration"
                     },
-                    "Parameters": []
+                    "Parameters": [
+                        "KeyPairName",
+                    "BlockChainAccessCIDR",
+                    "InstanceType"
+                    ]
                 },
                 {
                     "Label": {
@@ -112,10 +106,10 @@
                         "default": "Quick Start S3 Key Prefix"
                     },
                     "BlockChainAccessCIDR": {
-                        "default": "Allowed External Access CIDR"
+                        "default": "Allowed Blockchain Access CIDR"
                     },
                     "RemoteAccessCIDR": {
-                        "default": "Allowed Remote SSH Access CIDR"
+                        "default": "Allowed SSH Access CIDR"
                     },
                     "VPCCIDR": {
                         "default": "VPC CIDR"
@@ -124,10 +118,10 @@
                         "default": "VPC ID"
                     },
                     "KeyPairName": {
-                        "default": "SSH Key Name"
+                        "default": "Key Pair Name"
                     },
                     "InstanceType": {
-                        "default": "CiscoBlockchain Instance Type"
+                        "default": "BlockChain InstanceType"
                     },
                     "NumberOfAZs": {
                         "default": "Number of used AZs"
@@ -148,7 +142,7 @@
                 "Type": "AWS::EC2::KeyPair::KeyName"
             },
             "InstanceType": {
-                "Description": "Instance type for CiscoBlockchain Nodes",
+                "Description": "Amazon EC2 instance type for the blockchain instances",
                 "Type": "String",
                 "Default": "t2.xlarge",
                 "AllowedValues": [
@@ -312,13 +306,13 @@
             "RemoteAccessCIDR": {
                 "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
                 "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-                "Description": "The CIDR IP range that is permitted to access the instances We recommend that you set this value to a trusted IP range.",
+                "Description": "Allowed CIDR block for external SSH access",
                 "Type": "String"
             },
             "BlockChainAccessCIDR": {
                 "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$",
                 "ConstraintDescription": "CIDR block parameter must be in the form x.x.x.x/x",
-                "Description": "The CIDR IP range that is permitted to access the instances We recommend that you set this value to a trusted IP range.",
+                "Description": "Allowed CIDR block for external Blockchain access",
                 "Type": "String"
             },
             "VPCCIDR": {
