@@ -241,21 +241,24 @@
                         "CidrIp": {
                             "Ref": "BlockChainAccessCIDR"
                         }
-                    },
+                    }
+                ]
+            }
+        },
+        "ESSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Elasticsearch Access",
+                "VpcId": {
+                    "Ref": "VPCID"
+                },
+                "SecurityGroupIngress": [
                     {
                         "IpProtocol": "tcp",
                         "FromPort": "443",
                         "ToPort": "443",
                         "CidrIp": {
                             "Ref": "BlockChainAccessCIDR"
-                        }
-                    },
-                    {
-                        "IpProtocol": "icmp",
-                        "FromPort": "-1",
-                        "ToPort": "-1",
-                        "CidrIp": {
-                            "Ref": "RemoteAccessCIDR"
                         }
                     }
                 ]
@@ -1454,7 +1457,7 @@
                     ],
                     "SecurityGroupIds": [
                         {
-                            "Ref": "BlockChainSecurityGroup"
+                            "Ref": "ESSecurityGroup"
                         }
                     ]
                 }
