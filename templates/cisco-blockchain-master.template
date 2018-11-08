@@ -547,6 +547,9 @@
                         "QSS3KeyPrefix": {
                             "Ref": "QSS3KeyPrefix"
                         },
+                        "BlockChainAccessCIDR": {
+                            "Ref": "BlockChainAccessCIDR"
+                        },
                         "RemoteAccessCIDR": {
                             "Ref": "RemoteAccessCIDR"
                         },
