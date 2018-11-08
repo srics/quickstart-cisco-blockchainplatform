@@ -213,7 +213,7 @@
         "BlockChainSecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "GroupDescription": "Enables SSH Access",
+                "GroupDescription": "Enables Blockchain Access",
                 "VpcId": {
                     "Ref": "VPCID"
                 },
